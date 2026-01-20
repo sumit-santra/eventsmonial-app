@@ -1,0 +1,364 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ScrollViewBase, Image } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
+const SignUpScreen = ({ navigation }: any) => {
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+
+  const handleLogin = () => {
+    navigation.navigate('OTP');
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.ScrollViewContainer}>
+      <LinearGradient
+        colors={['#FAF2F2', '#F8F8F9']}
+        style={styles.container}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+            <MaterialIcons name="west" color="#5D5D5D" size={20} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+            <Text style={styles.skip}>SKIP</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.title}>Start Planning Your Event</Text>
+        <Text style={styles.subTitle}>
+          Welcome to Eventsmonial, your smart event planning assistant.
+        </Text>
+
+        <View style={styles.twoCol}>
+          <View style={{flex: 1, paddingRight: 6,}}>
+            <Text style={styles.label}>First Name*</Text>
+            <TextInput
+              placeholder="Enter your first name"
+              placeholderTextColor="#aaa"
+              style={styles.input}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+          <View style={{flex: 1, paddingLeft: 6,}}>
+            <Text style={styles.label}>Last Name*</Text>
+            <TextInput
+              placeholder="Enter your last name"
+              placeholderTextColor="#aaa"
+              style={styles.input}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+
+
+        <Text style={styles.label}>Email*</Text>
+        <TextInput
+          placeholder="Enter your email address"
+          placeholderTextColor="#aaa"
+          style={styles.input}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <Text style={styles.label}>Mobile Number*</Text>
+        
+        <View style={styles.passwordBox}>
+          <Text style={styles.countryCode}>(+91)</Text>
+
+          <TextInput
+            placeholder="Enter mobile number"
+            placeholderTextColor="#aaa"
+            style={styles.passwordInput}
+            keyboardType="phone-pad"
+            maxLength={10}
+          />
+        </View>
+
+        
+
+        {/* Password */}
+        <Text style={styles.label}>Password</Text>
+        
+        <View style={styles.passwordBox}>
+          <TextInput
+            placeholder="Enter your password"
+            placeholderTextColor="#aaa"
+            style={styles.passwordInput}
+            secureTextEntry={!passwordVisible}
+          />
+          <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
+            <MaterialIcons name={passwordVisible ? "visibility" : "visibility-off"} size={22} color="#999" />
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.label}>Confirm Password</Text>
+        
+        <View style={styles.passwordBox}>
+          <TextInput
+            placeholder="Enter your confirm password"
+            placeholderTextColor="#aaa"
+            style={styles.passwordInput}
+            secureTextEntry={!confirmPasswordVisible}
+          />
+          <TouchableOpacity onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
+            <MaterialIcons name={confirmPasswordVisible ? "visibility" : "visibility-off"} size={22} color="#999" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.row}>
+          <TouchableOpacity style={styles.remember} onPress={() => setRememberMe(!rememberMe)}>
+            <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+              {rememberMe && <MaterialIcons name="check" size={16} color="#fff" />}
+            </View>
+            
+          </TouchableOpacity>
+          {/* <Text style={styles.rememberText}>I agree to all the Terms & Conditions and Privacy Policy</Text> */}
+          <Text style={styles.rememberText}>
+            I agree to all the{' '}
+            <Text
+              style={styles.link}
+              onPress={() => navigation.navigate('Terms')}
+            >
+              Terms & Conditions
+            </Text>{' '}
+            and{' '}
+            <Text
+              style={styles.link}
+              onPress={() => navigation.navigate('Privacy')}
+            >
+              Privacy Policy
+            </Text>
+          </Text>
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Register</Text>
+        </TouchableOpacity>
+
+        <Text style={[styles.signup, {paddingTop: 30}]}>
+          {`It only takes a minute and you're ready to celebrate! `}
+        </Text>
+
+        <Text style={styles.signup}>
+          {` Already have an account? `}{' '}
+          <Text style={{ color: '#ff0066', fontWeight: 700, }} onPress={() => navigation.navigate('Login')}>Sign in</Text>
+        </Text>
+
+        <View style={styles.dividerRow}>
+          <View style={styles.line} />
+          <Text style={styles.or}>Or Sign In with</Text>
+          <View style={styles.line} />
+        </View>
+
+        <TouchableOpacity style={styles.googleBtn}>
+          <Image
+            source={require('../../assets/images/google.png')}
+            style={styles.googleIcon}
+          />
+          <Text style={styles.googleText}>Continue with Google</Text>
+        </TouchableOpacity>
+      
+      </LinearGradient>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  twoCol:{
+    flexDirection: 'row',
+  },
+
+  countryCode: {
+    fontSize: 16,
+    color: '#333',
+    marginRight: 10,
+  },
+
+  ScrollViewContainer: {
+    flexGrow: 1,
+  },
+
+  container: {
+    paddingVertical: 50,
+    paddingHorizontal: 20,
+    flexGrow: 1,
+  },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 40,
+    alignItems: 'center',
+  },
+
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 36,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  skip: {
+    color: '#8c8c8c',
+    fontSize: 14,
+    lineHeight: 15,
+    borderBottomColor: '#9A9999',
+    borderBottomWidth: 1,
+    paddingBottom: 2
+  },
+
+  title: { 
+    fontSize: 30, 
+    fontWeight: 'bold',  
+    textAlign: 'center',
+    paddingTop: 20,
+    paddingBottom: 6,
+  },
+
+  input: { 
+    borderWidth: 1, 
+    borderColor: '#ddd', 
+    padding: 15, 
+    borderRadius: 8, 
+    marginBottom: 12, 
+    fontSize: 16 
+  },
+
+  button: { 
+    backgroundColor: '#FF0762', 
+    padding: 15, 
+    borderRadius: 8, 
+    marginTop: 22, 
+  },
+
+  buttonText: { 
+    color: '#fff', 
+    textAlign: 'center', 
+    fontSize: 16, 
+    fontWeight: '600' 
+  },
+
+  subTitle: {
+    fontSize: 10,
+    marginBottom: 30,
+    textAlign: 'center',
+    color: '#434E58'
+  },
+
+  link: { 
+    color: '#FF0762', 
+    textAlign: 'center', 
+    marginTop: 15, 
+    fontSize: 14 
+  },
+
+  label: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 6,
+    marginTop: 2,
+  },
+
+  passwordBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    borderWidth: 1, 
+    borderColor: '#ddd', 
+    padding: 15, 
+    borderRadius: 8, 
+    marginBottom: 15, 
+    fontSize: 16 
+  },
+
+  passwordInput: {
+    padding: 0,
+    flex: 1,
+  },
+
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 0,
+    paddingBottom: 5,
+    alignItems: 'center',
+  },
+
+  remember: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    marginRight: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#FF0762',
+    borderColor: '#FF0762',
+  },
+  rememberText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  
+  
+
+  signup: {
+    textAlign: 'center',
+    color: '#555',
+  },
+
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 30,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#eee',
+  },
+  or: {
+    marginHorizontal: 10,
+    fontSize: 12,
+    color: '#aaa',
+  },
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#eee',
+    backgroundColor: '#ffffff',
+    padding: 14,
+    borderRadius: 12,
+  },
+  googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 20,
+  },
+  googleText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#474747'
+  },
+ 
+});
+
+export default SignUpScreen;
