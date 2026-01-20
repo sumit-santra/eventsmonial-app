@@ -10,15 +10,155 @@ import {
   RefreshControl,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { MaterialIcons } from '@react-native-vector-icons/material-icons';
+import Swiper from 'react-native-swiper';
 import publicApi from '../../services/publicApi';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { FontFamily } from '../../theme/typography';
+import NoDataComponent from '../../components/Global/NoDataComponent';
+import ServiceInfoDisplay from '../../components/ServiceInfoDisplay';
+import RatingSummary from '../../components/RatingSummary';
+import FeaturedHorizontalSection from '../../components/Global/FeaturedHorizontalSection';
+
+export interface Location {
+  type: 'Point';
+  coordinates: [number, number];
+}
+
+export interface OpeningHour {
+  day: string;
+  open: string;
+  close: string;
+  isOpen: boolean;
+}
+
+export interface RatingDistribution {
+  fiveStars: number;
+  fourStars: number;
+  threeStars: number;
+  twoStars: number;
+  oneStars: number;
+  totalReviews: number;
+}
+
+export interface Rating {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: RatingDistribution;
+}
+
+export interface ServiceInfo {
+  description?: string;
+  inclusions?: string[];
+  exclusions?: string[];
+  gmaps_rating?: number;
+  gmaps_reviews_count?: number;
+}
+
+export interface ServicePrice {
+  price: number;
+  unit?: string;
+}
+
+export interface VendorService {
+  _id: string;
+  businessId: string;
+  vendorId: string;
+  category: string;
+  serviceInfo: ServiceInfo;
+  prices: ServicePrice[];
+}
+
+export interface Business {
+  _id: string;
+  vendorId: string;
+  name: string;
+  slug: string;
+  category: string;
+
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+
+  location: Location;
+  travelAvailability: 'withincity' | 'outsidecity' | 'anywhere';
+
+  images: string[];
+  featuredImages: string[];
+  portfolios: any[];
+
+  languagesSpoken: string[];
+  openingHours: OpeningHour[];
+
+  serviceCount: number;
+  rankingScore: number;
+
+  viewCount: number;
+  lastVendorLogin: string;
+
+  isNew: boolean;
+  isPopular: boolean;
+  isFeatured: boolean;
+  isTrending: boolean;
+  isTopRated: boolean;
+  isRecommended: boolean;
+  isPremium: boolean;
+  isVerified: boolean;
+  isPublish: boolean;
+  isHighlyActive: boolean;
+  isMostSearched: boolean;
+  hasNewLeads: boolean;
+  hasServices: boolean;
+  isDeleted: boolean;
+
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  scoreUpdatedAt: string;
+
+  __v: number;
+}
+
+export interface VendorDetails {
+  business: Business;
+  rating: Rating;
+  service: VendorService[];
+}
 
 const VendorDetailsScreen = ({ navigation, route }: any) => {
 
   const { vendorId } = route.params;
-  const [vendorsDetails, setVendorsDetails] = useState(null);
+  const [vendorsDetails, setVendorsDetails] = useState<VendorDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const reviews = [
+    {
+      id: '1',
+      name: 'Kim Bordy',
+      comment:
+        'Amazing! The room is good than the picture. Thanks for amazing experience!',
+      rating: 4.5,
+      avatar: 'https://i.pravatar.cc/150?img=12',
+    },
+    {
+      id: '2',
+      name: 'Mirai Kamazuki',
+      comment:
+        'The service is on point, and I really like the facilities. Good job!',
+      rating: 5.0,
+      avatar: 'https://i.pravatar.cc/150?img=32',
+    },
+    {
+      id: '3',
+      name: 'Jzenklen',
+      comment:
+        'The service is on point, and I really like the facilities. Good job!',
+      rating: 5.0,
+      avatar: 'https://i.pravatar.cc/150?img=45',
+    },
+  ];
 
   console.log('Vendor ID:', vendorId);
 
@@ -57,12 +197,29 @@ const VendorDetailsScreen = ({ navigation, route }: any) => {
       }
     >
 
-      {/* HERO IMAGE */}
       <View style={styles.heroWrapper}>
-        <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e' }}
-          style={styles.heroImage}
-        />
+        <Swiper
+          style={styles.heroSwiper}
+          dotStyle={styles.dot}
+          activeDotStyle={styles.activeDot}
+          paginationStyle={styles.pagination}
+          autoplay
+          autoplayTimeout={2}
+        >
+          {vendorsDetails?.business?.images && vendorsDetails?.business?.images?.length > 0 ? 
+              vendorsDetails?.business?.images?.slice(0, 5).map((image, index) => (
+              <Image
+                key={index}
+                source={{ uri: image }}
+                style={styles.heroImage}
+              />
+          )):(
+            <Image
+              source={require('../../assets/images/default-image.webp')}
+              style={styles.heroImage}
+            />
+          )}
+        </Swiper>
 
         <TouchableOpacity style={styles.iconTopRight}>
           <MaterialIcons name="favorite-border" size={22} color="#fff" />
@@ -77,99 +234,206 @@ const VendorDetailsScreen = ({ navigation, route }: any) => {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.iconBottomRight}>
-          <MaterialIcons name="photo-library" size={20} color="#fff" />
+          <MaterialIcons name="photo" size={20} color="#fff" />
           <Text style={styles.galleryText}>Gallery</Text>
         </TouchableOpacity>
       </View>
 
-      {/* CONTENT */}
+      <View style={{ backgroundColor: '#F8F8F9', height: 20, marginTop: -15, borderTopStartRadius: 15, borderTopEndRadius: 15, width: '100%', borderRadius: 2, marginBottom: 10 }}></View>
+
+      
       <View style={styles.content}>
+        <View style={styles.contactContainer}>
+          <TouchableOpacity style={styles.contactCard}>
+            <MaterialIcons name="call" size={18} color="#2ecc71" />
+            <Text style={styles.contactText}>Get Contact</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.contactCard}>
+            <MaterialIcons name="star" size={18} color="#ff2d55" />
+            <Text style={styles.contactRatingText}>{vendorsDetails?.rating?.totalReviews || "0"}</Text>
+            <Text style={styles.contactReviewText}>({vendorsDetails?.rating?.ratingDistribution?.totalReviews || "0"} Reviews)</Text>
+          </View>
+          
+          <View style={styles.contactCard}>
+            <Image
+              source={require('../../assets/images/google.png')}
+              style={styles.contactGoogleIcon}
+            />
+            <Text style={styles.contactRatingText}>{vendorsDetails?.service?.[0]?.serviceInfo?.gmaps_rating || "0.0"}</Text>
+            <Text style={styles.contactReviewText}>{vendorsDetails?.service?.[0]?.serviceInfo?.gmaps_reviews_count || "0.0"} Reviews</Text>
+          </View>
+        </View>
 
         {/* TITLE & RATINGS */}
-        <Text style={styles.vendorName}>Passionate Photography</Text>
-
-        <View style={styles.ratingRow}>
-          <View style={styles.badgePink}>
-            <Text style={styles.badgeText}>★ 5.0</Text>
-          </View>
-          <View style={styles.badgeWhite}>
-            <Text style={styles.badgeDark}>5.0 (86 Reviews)</Text>
-          </View>
-        </View>
-
-        {/* CTA */}
-        <TouchableOpacity style={styles.contactBtn}>
-          <Text style={styles.contactText}>Get Contact</Text>
-        </TouchableOpacity>
-
-        {/* DESCRIPTION */}
-        <Text style={styles.sectionTitle}>Description</Text>
-        <Text style={styles.desc}>
-          Just capture moments and freeze memories. East Kolkata based
-          wedding photography team capturing emotions with passion.
+        <Text style={styles.vendorName}>
+          {vendorsDetails?.business?.name}
         </Text>
 
-        {/* SERVICE INFO */}
-        <Text style={styles.sectionTitle}>Service Information</Text>
-
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Package Starts</Text>
-          <Text style={styles.infoValue}>₹35,000</Text>
-        </View>
-
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Photo + Video</Text>
-          <Text style={styles.infoValue}>Available</Text>
-        </View>
-
-        {/* PHOTO GALLERY */}
-        <Text style={styles.sectionTitle}>Photo & Video</Text>
-        <FlatList
-          data={[1, 2, 3, 4]}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          renderItem={() => (
-            <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e' }}
-              style={styles.galleryImage}
-            />
-          )}
-        />
-
-        {/* RATINGS */}
-        <Text style={styles.sectionTitle}>Ratings & Reviews</Text>
-        <View style={styles.ratingSummary}>
-          <Text style={styles.bigRating}>4.4</Text>
-          <Text style={styles.reviewCount}>Based on 532 reviews</Text>
-        </View>
-
-        {/* REVIEWS */}
-        <View style={styles.reviewCard}>
-          <Text style={styles.reviewer}>Kim Bordy ⭐ 4.5</Text>
-          <Text style={styles.reviewText}>
-            Thanks for amazing experience!
+        <View style={styles.locationRow}>
+          <MaterialIcons name="location-on" size={16} color="#666" />
+          <Text style={styles.address}>
+            {vendorsDetails?.business?.address}
           </Text>
         </View>
 
-        <TouchableOpacity>
+        
+        <Text style={styles.sectionTitle}>Description</Text>
+        <Text style={styles.desc}>
+          {showFullDescription 
+            ? (vendorsDetails?.service?.[0]?.serviceInfo?.description || 'No description available.')
+            : (vendorsDetails?.service?.[0]?.serviceInfo?.description?.substring(0, 100) || 'No description available.')}
+          {!showFullDescription && vendorsDetails?.service?.[0]?.serviceInfo?.description && vendorsDetails?.service?.[0]?.serviceInfo?.description.length > 100 && '...'}
+        </Text>
+        {vendorsDetails?.service?.[0]?.serviceInfo?.description && vendorsDetails?.service?.[0]?.serviceInfo?.description.length > 100 && (
+          <TouchableOpacity onPress={() => setShowFullDescription(!showFullDescription)}>
+            <Text style={styles.readMore}>
+              {showFullDescription ? 'Read Less' : 'Read More'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        
+        <Text style={styles.sectionTitle}>Service Information</Text>
+        <ServiceInfoDisplay
+          serviceInfo={vendorsDetails?.service?.[0]?.serviceInfo}
+          category={vendorsDetails?.service?.[0]?.category || ''}
+        />
+
+        {/* PHOTO GALLERY */}
+        <Text style={styles.sectionTitle}>Photo & Video</Text>
+
+        {vendorsDetails?.business?.images && vendorsDetails?.business?.images?.length > 0 ? (
+          <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+            {vendorsDetails?.business?.images?.slice(0, 3).map((image, index) => {
+              const totalImages = vendorsDetails.business.images.length;
+              const remainingCount = totalImages - 3;
+
+              return (
+                <View key={index} style={styles.galleryImageBox}>
+                  <Image
+                    source={{ uri: image }}
+                    style={styles.galleryImage}
+                  />
+
+                  {index === 2 && remainingCount > 0 && (
+                    <View style={styles.overlay}>
+                      <MaterialIcons name="photo" size={20} color="#fff" />
+                      <Text style={styles.overlayText}>
+                        + {remainingCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )
+            })}
+            
+          </View>
+        ) : (
+          <NoDataComponent icon="photo" text="No images available." />
+        )}
+        
+
+        {/* RATINGS */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Text style={styles.sectionTitle}>Ratings & Reviews</Text>
+
+          <TouchableOpacity>
+            <Text style={{ color: '#FF0762', fontSize: 14, fontWeight: 'bold', marginTop: 20, marginBottom: 6, }}>
+              Write a Review
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.ratingSummary}>
+          <RatingSummary/>
+        </View>
+
+        <Text style={styles.sectionTitle}>Reviews (0)</Text>
+
+        <View style={styles.reviewsList}>
+          {reviews.map((item) => (
+            <View key={item.id} style={styles.reviewItem}>
+              <Image source={{ uri: item.avatar }} style={styles.avatar} />
+
+              <View style={styles.reviewContent}>
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.comment}>{item.comment}</Text>
+              </View>
+
+              <View style={styles.ratingContainer}>
+                <MaterialIcons name="star" size={18} color="#FFB800" />
+                <Text style={styles.rating}>{item.rating.toFixed(1)}</Text>
+              </View>
+            </View>
+          ))}
+          {/* <NoDataComponent icon="reviews" text="No reviews available." /> */}
+        </View>
+          
+
+       
+
+        <TouchableOpacity style={{ marginTop: 5, marginBottom: 20, alignItems: 'center' }}>
           <Text style={styles.viewAll}>View All Reviews</Text>
         </TouchableOpacity>
 
-        {/* RELATED VENDORS */}
-        <Text style={styles.sectionTitle}>Make Up Artist For Month</Text>
-        <FlatList
-          data={[1, 2]}
-          horizontal
-          renderItem={() => (
-            <View style={styles.relatedCard}>
-              <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2' }}
-                style={styles.relatedImage}
-              />
-              <Text style={styles.relatedTitle}>Star Makeup Studio</Text>
-            </View>
-          )}
-        />
+
+        <View>
+          <FeaturedHorizontalSection
+              title="Similar Catering Services"
+              buttonText="View All"
+              buttonColor="#FF0055"
+              backgroundColor="#EDFDE0"
+              items={[
+                {
+                  id: '1',
+                  image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
+                  rating: 5.0,
+                  views: '46K',
+                  title: '4 Star & Above Wedding Hotels',
+                  location: 'Kolkata Wedding Venues',
+                },
+                {
+                  id: '2',
+                  image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
+                  rating: 4.8,
+                  views: '32K',
+                  title: 'Premium Bridal Makeover',
+                  location: 'Kolkata Wedding Venues',
+                },
+              ]}
+            />
+        </View>
+
+
+        <View>
+          <FeaturedHorizontalSection
+              title="You May Also Like Bartenders"
+              buttonText="View All"
+              buttonColor="#FF0055"
+              backgroundColor="#FFFFE7"
+              items={[
+                {
+                  id: '1',
+                  image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
+                  rating: 5.0,
+                  views: '46K',
+                  title: 'Experienced Bartenders',
+                  location: 'Kolkata Wedding Venues',
+                },
+                {
+                  id: '2',
+                  image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
+                  rating: 4.8,
+                  views: '32K',
+                  title: 'Premium Bridal Makeover',
+                  location: 'Kolkata Wedding Venues',
+                },
+              ]}
+            />
+        </View>
+
+        
       </View>
     </ScrollView>
   );
@@ -179,15 +443,126 @@ export default VendorDetailsScreen;
 
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: '#fff' },
+  container: { backgroundColor: '#F8F8F9' },
+
+  reviewsList:{
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+
+  reviewItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 8,  
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginRight: 12,
+  },
+  reviewContent: {
+    paddingRight: 8,
+    flexShrink: 1,
+  },
+  name: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  comment: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
+    
+  },
+  ratingContainer: {
+    width: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  star: {
+    width: 18,
+    height: 18,
+    marginRight: 4,
+  },
+  rating: {
+    fontSize: 14,
+    paddingLeft: 4,
+    fontWeight: '600',
+    color: '#111827',
+  },
+
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlayText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginTop: 5,
+  },
+
+
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingTop: 4,
+  },
+  
+  address: {
+    fontSize: 12,
+    color: '#666',
+    fontFamily: FontFamily.regular,
+    marginLeft: 4,
+    flex: 1,
+  },
 
   heroWrapper: {
     position: 'relative',
+    height: 300,
   },
+
+  heroSwiper: {
+    height: 300,
+  },
+
   heroImage: {
     width: '100%',
-    height: 280,
+    height: 300,
   },
+
+  pagination: {
+    bottom: 30,
+  },
+
+  dot: {
+    backgroundColor: 'rgba(255,255,255,0.4)',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 3,
+  },
+
+  activeDot: {
+    backgroundColor: '#FF0762',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 3,
+  },
+
   iconTopRight: {
     position: 'absolute',
     top: 40,
@@ -196,6 +571,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
   },
+
   iconTopLeft: {
     position: 'absolute',
     top: 40,
@@ -204,26 +580,31 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
   },
+
   iconBottomRight: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 23,
     right: 20,
     flexDirection: 'row',
     backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 8,
-    borderRadius: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 6,
     alignItems: 'center',
   },
+
   iconBottomLeft:{
     position: 'absolute',
-    bottom: 20,
+    bottom: 23,
     left: 20,
     flexDirection: 'row',
     backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 8,
-    borderRadius: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 6,
     alignItems: 'center',
   },
+
   galleryText: {
     color: '#fff',
     marginLeft: 5,
@@ -231,12 +612,15 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: '#F8F8F9'
   },
 
   vendorName: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
+    paddingBottom: 4,
   },
 
   ratingRow: {
@@ -276,22 +660,24 @@ const styles = StyleSheet.create({
     marginVertical: 14,
   },
 
-  contactText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: '600',
-  },
+  
 
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    marginTop: 20,
-    marginBottom: 8,
+    marginTop: 10,
+    marginBottom: 6,
   },
 
   desc: {
     color: '#666',
     lineHeight: 20,
+  },
+
+  readMore: {
+    color: '#FF0762',
+    fontWeight: '600',
+    marginTop: 5,
   },
 
   infoCard: {
@@ -311,16 +697,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  galleryImage: {
-    width: 110,
+  galleryImageBox: {
+    marginRight: 10,
+    width: '32%',
     height: 110,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+
+  galleryImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
     borderRadius: 10,
     marginRight: 10,
   },
 
   ratingSummary: {
     alignItems: 'center',
-    marginVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginBottom: 10,
   },
 
   bigRating: {
@@ -368,5 +767,44 @@ const styles = StyleSheet.create({
   relatedTitle: {
     marginTop: 6,
     fontWeight: '600',
+  },
+
+
+  contactContainer: {
+    flexDirection: 'row',
+    gap: 5,
+    marginTop: -10,
+    marginBottom: 10,
+  },
+
+  contactCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  contactText: {
+    marginLeft: 6,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  contactRatingText: {
+    marginLeft: 6,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  contactReviewText: {
+    marginLeft: 2,
+    fontSize: 10,
+    color: '#666',
+  },
+  contactGoogleIcon: {
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
   },
 });
