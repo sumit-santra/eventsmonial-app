@@ -15,8 +15,8 @@ import publicApi from '../../services/publicApi';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FontFamily } from '../../theme/typography';
 import NoDataComponent from '../../components/Global/NoDataComponent';
-import ServiceInfoDisplay from '../../components/ServiceInfoDisplay';
-import RatingSummary from '../../components/RatingSummary';
+import ServiceInfoDisplay from '../../components/Global/ServiceInfoDisplay';
+import RatingSummary from '../../components/Global/RatingSummary';
 import FeaturedHorizontalSection from '../../components/Global/FeaturedHorizontalSection';
 
 export interface Location {

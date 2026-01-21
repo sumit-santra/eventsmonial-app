@@ -93,7 +93,7 @@ const VendorListScreen = ({ navigation, route }: any) => {
 
   return (
     <LinearGradient colors={['#FAF2F2', '#F8F8F9']} style={styles.container}>
-      <HomeHeader showCategories={false} isCategories={false} />
+      <HomeHeader navigation={navigation} showCategories={false} isCategories={false} isBackButton={true}/>
       
       {loading ? (
         <View style={styles.content}>

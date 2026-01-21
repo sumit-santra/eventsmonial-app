@@ -77,7 +77,7 @@ const VendorScreen = ({ navigation }: any) => {
     
     <LinearGradient colors={['#FAF2F2', '#F8F8F9']} style={styles.container}>
      
-      <HomeHeader showCategories={false} isCategories={false} />
+      <HomeHeader navigation={navigation} showCategories={false} isCategories={false} />
       
       {loading ? (
         <View style={[styles.content, { paddingHorizontal: 20 }]}>

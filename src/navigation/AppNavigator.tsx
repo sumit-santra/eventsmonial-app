@@ -14,10 +14,10 @@ import ResetPasswordScreen from '../screens/auth/ResetPasswordScreen';
 import VendorListScreen from '../screens/vendor/VendorListScreen';
 import VendorDetailScreen from '../screens/vendor/VendorDetailScreen';
 
-import WebsiteScreen from '../screens/website/WebsiteScreen';
 import TermsScreen from '../screens/auth/TermsScreen';
 import PrivacyScreen from '../screens/auth/PrivacyScreen';
 import BottomTabNavigator from './BottomTabNavigator';
+import ECardDetailScreen from '../screens/ecard/ECardDetailScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -32,10 +32,10 @@ export type RootStackParamList = {
   MainTabs: undefined;
 
   VendorList: { categoryValue: string };
-  GuestHome: undefined;
-  AuthHome: undefined;
   VendorDetail: undefined;
-  Website: undefined;
+
+  ECardDetailScreen: { cardId: string; cardData: any };
+  
   Terms: undefined;
   Privacy: undefined;
 };
@@ -67,7 +67,8 @@ const AppNavigator = () => {
         <Stack.Screen name="VendorList" component={VendorListScreen} />
         <Stack.Screen name="VendorDetail" component={VendorDetailScreen} />
 
-        <Stack.Screen name="Website" component={WebsiteScreen} />
+        <Stack.Screen name="ECardDetailScreen" component={ECardDetailScreen} />
+
         <Stack.Screen name="Terms" component={TermsScreen} />
         <Stack.Screen name="Privacy" component={PrivacyScreen} />
       </Stack.Navigator>

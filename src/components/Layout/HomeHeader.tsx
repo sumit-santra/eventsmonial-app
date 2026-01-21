@@ -21,7 +21,7 @@ const categories = [
   { id: 7, label: 'Vendors', image: require('../../assets/images/vendors.png') },
 ];
 
-const HomeHeader = ({ showCategories = true, isCategories = true }: { showCategories?: boolean; isCategories?: boolean }) => {
+const HomeHeader = ({navigation, showCategories = true, isCategories = true, isBackButton = false }: { navigation: any; showCategories?: boolean; isCategories?: boolean; isBackButton?: boolean }) => {
   const [active, setActive] = useState(1);
 
   return (
@@ -62,14 +62,22 @@ const HomeHeader = ({ showCategories = true, isCategories = true }: { showCatego
       </View>
 
       {/* Search */}
-      <View style={styles.searchBox}>
-        <MaterialIcons name="search" size={20} color="#999" />
-        <TextInput
-          placeholder='Search any "Vendor"'
-          placeholderTextColor="#999"
-          style={styles.input}
-        />
-        <MaterialIcons name="mic" size={20} color="#999" />
+      <View style={{ marginTop: 10, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
+        {isBackButton && (
+          <TouchableOpacity style={styles.iconTopLeft} onPress={() => navigation.goBack()}>
+            <MaterialIcons name="west" size={22} color="#888888" />
+          </TouchableOpacity>
+        )}
+
+        <View style={styles.searchBox}>
+          <MaterialIcons name="search" size={20} color="#999" />
+          <TextInput
+            placeholder='Search any "Vendor"'
+            placeholderTextColor="#999"
+            style={styles.input}
+          />
+          <MaterialIcons name="mic" size={20} color="#999" />
+        </View>
       </View>
 
       {/* Categories */}
@@ -119,6 +127,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderBottomColor: 'rgba(255, 7, 98, 0.1)',
     borderBottomWidth: 1,
+  },
+
+  iconTopLeft: {
+    marginRight: 5,
+    backgroundColor: 'rgb(255,255,255)',
+    padding: 8,
+    borderRadius: 20,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   container: {
@@ -175,8 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 10,
     paddingHorizontal: 12,
-    marginTop: 10,
-    marginBottom: 10,
+    flex: 1,
     height: 44,
     borderColor: '#ececec',
     borderWidth: 1,

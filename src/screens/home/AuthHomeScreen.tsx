@@ -9,6 +9,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import HomeHeader from '../../components/Layout/HomeHeader';
 import FeaturedHorizontalSection from '../../components/Global/FeaturedHorizontalSection';
+import FeaturedHorizontalCardSection from '../../components/Global/FeaturedHorizontalCardSection';
 
 const AuthHomeScreen = ({ navigation }: any) => {
   const [showCategories, setShowCategories] = useState(true);
@@ -32,7 +33,7 @@ const AuthHomeScreen = ({ navigation }: any) => {
   return (
     <LinearGradient colors={['#FAF2F2', '#F8F8F9']} style={styles.container}>
       {/* Fixed Header */}
-      <HomeHeader showCategories={showCategories} />
+      <HomeHeader navigation={navigation} showCategories={showCategories} />
       
       <ScrollView 
         showsVerticalScrollIndicator={false} 
@@ -48,59 +49,103 @@ const AuthHomeScreen = ({ navigation }: any) => {
 
           
           <View>
-          <FeaturedHorizontalSection
-              title="Similar Catering Services"
-              buttonText="View All"
-              buttonColor="#FF0055"
-              backgroundColor="#EDFDE0"
-              items={[
-                {
-                  id: '1',
-                  image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
-                  rating: 5.0,
-                  views: '46K',
-                  title: '4 Star & Above Wedding Hotels 4 Star & Above Wedding Hotels 4 Star & Above Wedding Hotels',
-                  location: 'Kolkata Wedding Venues',
-                },
-                {
-                  id: '2',
-                  image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
-                  rating: 4.8,
-                  views: '32K',
-                  title: 'Premium Bridal Makeover',
-                  location: 'Kolkata Wedding Venues',
-                },
-              ]}
-            />
-        </View>
+            <FeaturedHorizontalSection
+                title="Similar Catering Services"
+                buttonText="View All"
+                buttonColor="#FF0055"
+                backgroundColor="#EDFDE0"
+                items={[
+                  {
+                    id: '1',
+                    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
+                    rating: 5.0,
+                    views: '46K',
+                    title: '4 Star & Above Wedding Hotels 4 Star & Above Wedding Hotels 4 Star & Above Wedding Hotels',
+                    location: 'Kolkata Wedding Venues',
+                  },
+                  {
+                    id: '2',
+                    image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
+                    rating: 4.8,
+                    views: '32K',
+                    title: 'Premium Bridal Makeover',
+                    location: 'Kolkata Wedding Venues',
+                  },
+                ]}
+              />
+          </View>
 
 
-        <View>
-          <FeaturedHorizontalSection
-              title="You May Also Like Bartenders"
-              buttonText="View All"
-              buttonColor="#FF0055"
-              backgroundColor="#FFFFE7"
-              items={[
-                {
-                  id: '1',
-                  image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
-                  rating: 5.0,
-                  views: '46K',
-                  title: 'Experienced Bartenders',
-                  location: 'Kolkata Wedding Venues',
-                },
-                {
-                  id: '2',
-                  image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
-                  rating: 4.8,
-                  views: '32K',
-                  title: 'Premium Bridal Makeover',
-                  location: 'Kolkata Wedding Venues',
-                },
-              ]}
-            />
-        </View>
+          <View>
+            <FeaturedHorizontalCardSection
+                title="You May Also Like Bartenders"
+                buttonText="View All"
+                buttonColor="#FF0055"
+                backgroundColor="#e7efff"
+                items={[
+                  {
+                    id: '1',
+                    thumbnailUrls: ['https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9'],
+                    rating: 5.0,
+                    views: '46K',
+                    title: 'Experienced Bartenders',
+                    location: 'Kolkata Wedding Venues',
+                  },
+                  {
+                    id: '2',
+                    thumbnailUrls: ['https://images.unsplash.com/photo-1500917293891-ef795e70e1f6', 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6'],
+                    rating: 4.8,
+                    views: '32K',
+                    title: 'Premium Bridal Makeover',
+                    location: 'Kolkata Wedding Venues',
+                  },
+                  {
+                    id: '3',
+                    thumbnailUrls: ['https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9'],
+                    rating: 5.0,
+                    views: '46K',
+                    title: 'Experienced Bartenders',
+                    location: 'Kolkata Wedding Venues',
+                  },
+                  {
+                    id: '4',
+                    thumbnailUrls: ['https://images.unsplash.com/photo-1500917293891-ef795e70e1f6'],
+                    rating: 4.8,
+                    views: '32K',
+                    title: 'Premium Bridal Makeover',
+                    location: 'Kolkata Wedding Venues',
+                  },
+                ]}
+              />
+          </View>
+
+
+          <View>
+            <FeaturedHorizontalSection
+                title="You May Also Like Bartenders"
+                buttonText="View All"
+                buttonColor="#FF0055"
+                backgroundColor="#FFFFE7"
+                items={[
+                  {
+                    id: '1',
+                    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
+                    rating: 5.0,
+                    views: '46K',
+                    title: 'Experienced Bartenders',
+                    location: 'Kolkata Wedding Venues',
+                  },
+                  {
+                    id: '2',
+                    image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
+                    rating: 4.8,
+                    views: '32K',
+                    title: 'Premium Bridal Makeover',
+                    location: 'Kolkata Wedding Venues',
+                  },
+                ]}
+              />
+          </View>
         </View>
 
         

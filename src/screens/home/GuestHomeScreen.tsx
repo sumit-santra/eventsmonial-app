@@ -32,7 +32,7 @@ const GuestHomeScreen = ({ navigation }: any) => {
   return (
     <LinearGradient colors={['#FAF2F2', '#F8F8F9']} style={styles.container}>
       {/* Fixed Header */}
-      <HomeHeader showCategories={showCategories} />
+      <HomeHeader navigation={navigation} showCategories={showCategories} />
       
       <ScrollView 
         showsVerticalScrollIndicator={false} 
