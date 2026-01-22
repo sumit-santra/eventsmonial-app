@@ -75,7 +75,7 @@ const VendorScreen = ({ navigation }: any) => {
 
   return (
     
-    <LinearGradient colors={['#FAF2F2', '#F8F8F9']} style={styles.container}>
+    <LinearGradient colors={['#F8F8F9', '#F8F8F9']} style={styles.container}>
      
       <HomeHeader navigation={navigation} showCategories={false} isCategories={false} />
       
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: FontFamily.bold,
     color: '#1B1B1B',
-    fontWeight: '600',
+    fontWeight: '700',
   },
 
   subtitle: {
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
 
   image: {
     width: '100%',
-    height: 100,
+    height: 120,
     borderRadius: 10,
     resizeMode: 'cover',
   },

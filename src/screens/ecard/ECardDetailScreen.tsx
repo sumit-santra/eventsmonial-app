@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Share,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Swiper from 'react-native-swiper';
@@ -17,30 +18,85 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FontFamily } from '../../theme/typography';
 import publicApi from '../../services/publicApi';
 import HomeHeader from '../../components/Layout/HomeHeader';
-
-const { width } = Dimensions.get('window');
+import FeaturedHorizontalCardSection from '../../components/Global/FeaturedHorizontalCardSection';
 
 interface ECardDetailScreenProps {
   navigation: any;
   route: any;
 }
 
+interface Template {
+  _id: string;
+  templateName: string;
+  eventType: string;
+  thumbnailUrls: string[];
+  cardType?: string;
+  templateStyle?: string;
+  religion?: string;
+  community?: string;
+  description?: string;
+  totalPages?: number;
+  slug?: string;
+}
+
 const ECardDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const { cardId, cardData } = route.params || {};
 
+  const [similarCards, setSimilarCards] = useState<Template[]>([]); 
+
   const [cardDetails, setCardDetails] = useState(cardData || null);
+
+  interface FetchCardsParams {
+    page: number;
+    limit: number;
+    cardType: string | null;
+    community: string | null;
+    eventType: string | null;
+    religion: string | null;
+    search: string;
+    templateStyle: string | null;
+  };
+
+  interface FetchCardsResponse {
+    data: {
+      templates: Template[];
+    };
+  };
+
+  const fetchCardsList = async (eventType: string | undefined, excludeCardId?: string): Promise<void> => { 
+    try {
+      const res: FetchCardsResponse = await publicApi.getAllcards({ 
+        page: 1, 
+        limit: 20, 
+        cardType: null,
+        community: null, 
+        eventType: eventType || null,
+        religion: null,
+        search: '',
+        templateStyle: null
+      } as FetchCardsParams);
+      
+      const apiData = res?.data;
+    
+      setSimilarCards(apiData.templates.filter(card => card._id !== excludeCardId) as Template[]);
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   useEffect(() => {
     fetchCardDetails();
+    fetchCardsList(cardData?.eventType, cardData?._id);
   }, [cardId, cardData]);
 
   const fetchCardDetails = async () => {
     setLoading(true);
     try {
       const res = await publicApi.getCardDetails(cardId);
-      console.log('Card Details Response:', res);
       setCardDetails(res?.data);
     } catch (err) {
       console.log('Error fetching card details:', err);
@@ -53,9 +109,20 @@ const ECardDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
     setIsFavorite(!isFavorite);
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchCardDetails();
+      await fetchCardsList(cardDetails?.eventType, cardDetails?._id);
+    } catch (error) {
+      console.log('Refresh error:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleCustomize = () => {
-    // Navigate to customization screen
-    console.log('Navigate to customize');
+    
   };
 
   const handleShare = async () => {
@@ -83,7 +150,7 @@ const ECardDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
   };
 
   return (
-    <LinearGradient colors={['#FAF2F2', '#F8F8F9']} style={styles.container}>
+    <LinearGradient colors={['#F8F8F9', '#F8F8F9']} style={styles.container}>
       
       <HomeHeader navigation={navigation} showCategories={false} isCategories={false} isBackButton={true}/>
 
@@ -95,6 +162,14 @@ const ECardDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh}
+              colors={['#FF0762']}
+              tintColor="#FF0762"
+            />
+          }
         >
          
           <View style={styles.sliderContainer}>
@@ -102,7 +177,8 @@ const ECardDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
               dotStyle={styles.dot}
               activeDotStyle={styles.activeDot}
               paginationStyle={styles.pagination}
-              autoplay={false}
+              autoplay={true}
+              autoplayTimeout={3}
             >
               {cardDetails.thumbnailUrls?.map((imageUrl: string, index: number) => (
                 <View key={index} style={styles.slideWrapper}>
@@ -144,7 +220,6 @@ const ECardDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
               <Text style={styles.premiumText}>Premium</Text>
             </View>
           </View>
-
           
           <View style={styles.infoContainer}>
             <Text style={styles.cardTitle}>{cardDetails.templateName}</Text>
@@ -155,9 +230,6 @@ const ECardDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
               </View>
               <View style={styles.metaChip}>
                 <Text style={styles.metaText}>{cardDetails.templateStyle}</Text>
-              </View>
-              <View style={styles.metaChip}>
-                <Text style={styles.metaText}>{cardDetails.totalPages} Pages</Text>
               </View>
             </View>
 
@@ -186,6 +258,26 @@ const ECardDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
               </View>
             </View>
           </View>
+
+          <View style={{ paddingHorizontal: 20 }} >
+            <FeaturedHorizontalCardSection
+                title="You might also like"
+                buttonText="View All"
+                buttonColor="#FF0055"
+                backgroundColor="#fcf6d0"
+                items={similarCards.map(card => ({
+                  _id: card._id,
+                  templateName: card.templateName,
+                  rating: 0,
+                  thumbnailUrls: card.thumbnailUrls,
+                  eventType: card.eventType,
+                  templateStyle: card.templateStyle || '',
+                  slug: card.slug || '',
+                }))}
+                navigation={navigation}
+              />
+          </View>
+
         </ScrollView>
       )}
 
@@ -254,7 +346,7 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 80,
   },
 
   sliderContainer: {
@@ -264,7 +356,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 15,
     overflow: 'hidden',
-    elevation: 3,
   },
 
   slideWrapper: {
@@ -347,7 +438,7 @@ const styles = StyleSheet.create({
 
   infoContainer: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 10,
   },
 
   cardTitle: {
@@ -355,7 +446,7 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
     fontWeight: '700',
     color: '#222',
-    marginBottom: 12,
+    marginBottom: 5,
   },
 
   metaRow: {
@@ -377,9 +468,8 @@ const styles = StyleSheet.create({
     color: '#FF0762',
     fontFamily: FontFamily.semibold,
     fontWeight: '600',
+    textTransform: 'capitalize',
   },
-
-
 
   section: {
     marginBottom: 25,
@@ -390,7 +480,7 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
     fontWeight: '700',
     color: '#222',
-    marginBottom: 12,
+    marginBottom: 10,
   },
 
   description: {

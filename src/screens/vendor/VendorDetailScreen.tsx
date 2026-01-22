@@ -6,10 +6,9 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  FlatList,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import Swiper from 'react-native-swiper';
 import publicApi from '../../services/publicApi';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -132,6 +131,9 @@ const VendorDetailsScreen = ({ navigation, route }: any) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [vendorsList, setVendorsList] = useState<any[]>([]);
+  const [vendorsVenue, setVendorsVenue] = useState<any[]>([]);
+  const [vendorsPhotography, setVendorsPhotography] = useState<any[]>([]);
 
   const reviews = [
     {
@@ -160,10 +162,10 @@ const VendorDetailsScreen = ({ navigation, route }: any) => {
     },
   ];
 
-  console.log('Vendor ID:', vendorId);
-
   useEffect(() => {
     fetchVendorsdetails();
+    fetchVendorsList('venues');
+    fetchVendorsList('photography');
   }, []);
 
   const fetchVendorsdetails = async () => {
@@ -172,6 +174,28 @@ const VendorDetailsScreen = ({ navigation, route }: any) => {
       const res = await publicApi.getVendorDetails(vendorId);
       // console.log('Vendors Response:', res);
       setVendorsDetails(res?.data || null);
+      fetchVendorsList(res?.data?.business?.category || '');
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchVendorsList = async (val: string) => {
+    try {
+      const res = await publicApi.getAllBusinesses({ category: val });
+      // console.log('Vendors Response:', res);
+      if (val === 'venues') {
+        setVendorsVenue(res?.data?.businesses || []);
+        setVendorsList(res?.data?.businesses || []);
+      } else if (val === 'photography') {
+        setVendorsPhotography(res?.data?.businesses || []);
+        setVendorsList(res?.data?.businesses || []);
+      } else {
+        setVendorsList(res?.data?.businesses || []);
+      }
+      
     } catch (err) {
       console.log(err);
     } finally {
@@ -185,8 +209,16 @@ const VendorDetailsScreen = ({ navigation, route }: any) => {
     setRefreshing(false);
   };
 
-  console.log('Vendor Details:', vendorsDetails);
 
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#FF0762" />
+        <Text style={styles.loadingText}>Loading vendor details...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView 
@@ -203,8 +235,8 @@ const VendorDetailsScreen = ({ navigation, route }: any) => {
           dotStyle={styles.dot}
           activeDotStyle={styles.activeDot}
           paginationStyle={styles.pagination}
-          autoplay
-          autoplayTimeout={2}
+          autoplay={true}
+          autoplayTimeout={3}
         >
           {vendorsDetails?.business?.images && vendorsDetails?.business?.images?.length > 0 ? 
               vendorsDetails?.business?.images?.slice(0, 5).map((image, index) => (
@@ -380,57 +412,33 @@ const VendorDetailsScreen = ({ navigation, route }: any) => {
 
         <View>
           <FeaturedHorizontalSection
-              title="Similar Catering Services"
+              title={`Similar ${vendorsDetails?.business?.category || ''}`}
               buttonText="View All"
               buttonColor="#FF0055"
-              backgroundColor="#EDFDE0"
-              items={[
-                {
-                  id: '1',
-                  image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
-                  rating: 5.0,
-                  views: '46K',
-                  title: '4 Star & Above Wedding Hotels',
-                  location: 'Kolkata Wedding Venues',
-                },
-                {
-                  id: '2',
-                  image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
-                  rating: 4.8,
-                  views: '32K',
-                  title: 'Premium Bridal Makeover',
-                  location: 'Kolkata Wedding Venues',
-                },
-              ]}
+              backgroundColor="#f4f3ec"
+              items={vendorsList}
+              onPressButton={() => navigation.navigate('VendorList', {
+                categoryValue: vendorsDetails?.business?.category || '',
+              })}
+              navigation={navigation}
+              loading={loading}
             />
         </View>
 
 
         <View>
           <FeaturedHorizontalSection
-              title="You May Also Like Bartenders"
-              buttonText="View All"
-              buttonColor="#FF0055"
-              backgroundColor="#FFFFE7"
-              items={[
-                {
-                  id: '1',
-                  image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
-                  rating: 5.0,
-                  views: '46K',
-                  title: 'Experienced Bartenders',
-                  location: 'Kolkata Wedding Venues',
-                },
-                {
-                  id: '2',
-                  image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
-                  rating: 4.8,
-                  views: '32K',
-                  title: 'Premium Bridal Makeover',
-                  location: 'Kolkata Wedding Venues',
-                },
-              ]}
-            />
+            title={`Popular ${vendorsDetails?.business?.category === 'venues' ? 'photography':'venues'}`}
+            buttonText="View All"
+            buttonColor="#FF0055"
+            backgroundColor="#f4f3ec"
+            items={vendorsDetails?.business?.category === 'venues' ?  vendorsPhotography : vendorsVenue}
+            onPressButton={() => navigation.navigate('VendorList', {
+              categoryValue: vendorsDetails?.business?.category === 'venues' ? 'photography' : 'venues',
+            })}
+            navigation={navigation}
+            loading={loading}
+          />
         </View>
 
         
@@ -444,6 +452,19 @@ export default VendorDetailsScreen;
 
 const styles = StyleSheet.create({
   container: { backgroundColor: '#F8F8F9' },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666',
+    fontFamily: FontFamily.regular,
+  },
 
   reviewsList:{
     paddingTop: 10,

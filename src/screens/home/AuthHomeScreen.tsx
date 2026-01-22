@@ -1,19 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import HomeHeader from '../../components/Layout/HomeHeader';
 import FeaturedHorizontalSection from '../../components/Global/FeaturedHorizontalSection';
 import FeaturedHorizontalCardSection from '../../components/Global/FeaturedHorizontalCardSection';
+import PromoSwiper from '../../components/Global/PromoSwiper';
+import VendorCetagori from '../../components/Global/VendorCetagori';
+import publicApi from '../../services/publicApi';
+import HomeVideoCard from '../../components/Global/HomeVideoCard';
+import StartAssistantCard from '../../components/Global/StartAssistantCard';
 
 const AuthHomeScreen = ({ navigation }: any) => {
   const [showCategories, setShowCategories] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const [vendorCategories, setVendorCategories] = useState<any[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [vendorsVenue, setVendorsVenue] = useState<any[]>([]);
+  const [vendorsPhotography, setVendorsPhotography] = useState<any[]>([]);
+  const [vendorsMakeup, setVendorsMakeup] = useState<any[]>([]);
+  const [allCards, setAllCards] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchVendorCategories();
+    fetchVendorCategoriesList('venue');
+    fetchVendorCategoriesList('photography');
+    fetchVendorCategoriesList('bridalmakeup');
+    fetchCardsList();
+  }, []);
+
+  const fetchVendorCategories = async () => {
+    setLoadingCategories(true);
+    try {
+      const res = await publicApi.getVendors();
+      setVendorCategories(res.data || res);
+    } catch (err) {
+      console.log('Error fetching vendor categories:', err);
+    } 
+  };
+
+  const fetchCardsList = async () => {
+    try {
+      const res = await publicApi.getAllcards({ 
+        page: 1, 
+        limit: 20, 
+        cardType: null,
+        community: null, 
+        eventType: null,
+        religion: null,
+        search: '',
+        templateStyle: null
+      });
+      
+      const apiData = res?.data;      
+      setAllCards(apiData.templates);
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchVendorCategoriesList = async (val: any) => {
+    try {
+      const res = await publicApi.getAllBusinesses({ category: val });
+      // console.log('Vendors Response:', res);
+      if (val === 'photography') {
+        setVendorsPhotography(res?.data?.businesses || []);
+      }
+      if (val === 'venue') {
+        setVendorsVenue(res?.data?.businesses || []);
+      }
+      if (val === 'bridalmakeup') {
+        setVendorsMakeup(res?.data?.businesses || []);
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -29,9 +101,19 @@ const AuthHomeScreen = ({ navigation }: any) => {
     setLastScrollY(scrollY);
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchVendorCategories();
+    await fetchVendorCategoriesList('venue');
+    await fetchVendorCategoriesList('photography');
+    await fetchVendorCategoriesList('bridalmakeup');
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  };
 
   return (
-    <LinearGradient colors={['#FAF2F2', '#F8F8F9']} style={styles.container}>
+    <LinearGradient colors={['#ffffff', '#F8F8F9']} style={styles.container}>
       {/* Fixed Header */}
       <HomeHeader navigation={navigation} showCategories={showCategories} />
       
@@ -40,112 +122,104 @@ const AuthHomeScreen = ({ navigation }: any) => {
         style={styles.scrollView}
         onScroll={handleScroll}
         scrollEventThrottle={10}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            colors={['#FF0762']}
+            tintColor="#FF0762"
+          />
+        }
       >
 
         {/* Content */}
         <View style={styles.content}>
-          <Text style={styles.title}>Welcome Back!</Text>
-          <Text style={styles.subtitle}>You are logged in</Text>
+
+          <View style={{ marginBottom: 20, paddingHorizontal: 20 }}>
+            <PromoSwiper />
+          </View>
+
+          <View style={{ marginBottom: 20, paddingHorizontal: 0 }}>
+            <VendorCetagori navigation={navigation} categories={vendorCategories} loading={loadingCategories} />
+          </View>
+
+          
+          <View style={{ paddingHorizontal: 20 }}>
+            <FeaturedHorizontalSection
+                title="Popular Venue Searches"
+                buttonText="View All"
+                buttonColor="#FF0055"
+                backgroundColor="#eef3f6"
+                items={vendorsVenue}
+                onPressButton={() => navigation.navigate('VendorList', {
+                  categoryValue: 'venue',
+                })}
+                navigation={navigation}
+                loading={loadingCategories}
+              />
+          </View>
+
+
+          <View style={{ paddingHorizontal: 20 }}>
+            <HomeVideoCard/>
+          </View>
+
+
+          <View style={{ paddingHorizontal: 20 }}>
+            <FeaturedHorizontalSection
+                title="Popular bridal makeup artists"
+                buttonText="View All"
+                buttonColor="#FF0055"
+                backgroundColor="#f5eef1"
+                items={vendorsMakeup}
+                onPressButton={() => navigation.navigate('VendorList', {
+                  categoryValue: 'bridalmakeup',
+                })}
+                navigation={navigation}
+                loading={loadingCategories}
+              />
+          </View>
 
           
           <View>
-            <FeaturedHorizontalSection
-                title="Similar Catering Services"
-                buttonText="View All"
-                buttonColor="#FF0055"
-                backgroundColor="#EDFDE0"
-                items={[
-                  {
-                    id: '1',
-                    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
-                    rating: 5.0,
-                    views: '46K',
-                    title: '4 Star & Above Wedding Hotels 4 Star & Above Wedding Hotels 4 Star & Above Wedding Hotels',
-                    location: 'Kolkata Wedding Venues',
-                  },
-                  {
-                    id: '2',
-                    image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
-                    rating: 4.8,
-                    views: '32K',
-                    title: 'Premium Bridal Makeover',
-                    location: 'Kolkata Wedding Venues',
-                  },
-                ]}
-              />
+            <StartAssistantCard navigation={navigation} />
           </View>
 
 
-          <View>
+          <View style={{ paddingHorizontal: 20 }}>
             <FeaturedHorizontalCardSection
-                title="You May Also Like Bartenders"
+                title="Cards That Speak Celebration"
                 buttonText="View All"
                 buttonColor="#FF0055"
-                backgroundColor="#e7efff"
-                items={[
-                  {
-                    id: '1',
-                    thumbnailUrls: ['https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9'],
-                    rating: 5.0,
-                    views: '46K',
-                    title: 'Experienced Bartenders',
-                    location: 'Kolkata Wedding Venues',
-                  },
-                  {
-                    id: '2',
-                    thumbnailUrls: ['https://images.unsplash.com/photo-1500917293891-ef795e70e1f6', 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6'],
-                    rating: 4.8,
-                    views: '32K',
-                    title: 'Premium Bridal Makeover',
-                    location: 'Kolkata Wedding Venues',
-                  },
-                  {
-                    id: '3',
-                    thumbnailUrls: ['https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9'],
-                    rating: 5.0,
-                    views: '46K',
-                    title: 'Experienced Bartenders',
-                    location: 'Kolkata Wedding Venues',
-                  },
-                  {
-                    id: '4',
-                    thumbnailUrls: ['https://images.unsplash.com/photo-1500917293891-ef795e70e1f6'],
-                    rating: 4.8,
-                    views: '32K',
-                    title: 'Premium Bridal Makeover',
-                    location: 'Kolkata Wedding Venues',
-                  },
-                ]}
+                backgroundColor="#eff5f2"
+                items={allCards}
+                navigation={navigation}
+                onPressButton={() => navigation.navigate('E-Card')}
               />
           </View>
 
 
-          <View>
+
+          <View style={{ paddingHorizontal: 20 }}>
             <FeaturedHorizontalSection
-                title="You May Also Like Bartenders"
+                title="Popular photography"
                 buttonText="View All"
                 buttonColor="#FF0055"
-                backgroundColor="#FFFFE7"
-                items={[
-                  {
-                    id: '1',
-                    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
-                    rating: 5.0,
-                    views: '46K',
-                    title: 'Experienced Bartenders',
-                    location: 'Kolkata Wedding Venues',
-                  },
-                  {
-                    id: '2',
-                    image: 'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6',
-                    rating: 4.8,
-                    views: '32K',
-                    title: 'Premium Bridal Makeover',
-                    location: 'Kolkata Wedding Venues',
-                  },
-                ]}
+                backgroundColor="#f4f3ec"
+                items={vendorsPhotography}
+                onPressButton={() => navigation.navigate('VendorList', {
+                  categoryValue: 'photography',
+                })}
+                navigation={navigation}
+                loading={loadingCategories}
               />
           </View>
+
+
+          
+
+
+          
         </View>
 
         
@@ -167,8 +241,7 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    padding: 20,
-    paddingTop: 30,
+    paddingVertical: 20,
   },
 
   title: {

@@ -12,12 +12,13 @@ import { FontFamily } from '../../theme/typography';
 import Swiper from 'react-native-swiper';
 
 type ItemType = {
-  id: string;
+  _id: string;
   thumbnailUrls: string[];
   rating: number;
-  views: string;
-  title: string;
-  location: string;
+  templateName: string;
+  eventType: string;
+  templateStyle: string;
+  slug: string;
 };
 
 type Props = {
@@ -27,6 +28,7 @@ type Props = {
   backgroundColor?: string;
   buttonColor?: string;
   items: ItemType[];
+  navigation: any;
 };
 
 const FeaturedHorizontalCardSection: React.FC<Props> = ({
@@ -36,6 +38,8 @@ const FeaturedHorizontalCardSection: React.FC<Props> = ({
   backgroundColor = '#FFFFFF',
   buttonColor = '#FF0055',
   items,
+  navigation,
+  
 }) => {
   return (
     <View style={[styles.container, { backgroundColor }]}>
@@ -55,10 +59,13 @@ const FeaturedHorizontalCardSection: React.FC<Props> = ({
         data={items}
         horizontal
         showsHorizontalScrollIndicator={false}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item._id}
         contentContainerStyle={{ paddingHorizontal: 4 }}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <TouchableOpacity 
+                style={styles.card}
+                onPress={() => navigation.navigate('ECardDetailScreen', { cardId: item.slug, cardData: item })}
+              >
                 
                 <View style={styles.imageWrapper}>
                   {item.thumbnailUrls.length > 1 ? (
@@ -66,7 +73,7 @@ const FeaturedHorizontalCardSection: React.FC<Props> = ({
                       dotStyle={styles.dot}
                       activeDotStyle={styles.activeDot}
                       paginationStyle={styles.pagination}
-                      autoplay
+                      autoplay={true}
                       autoplayTimeout={3}
                     >
                       {item.thumbnailUrls.map((imageUrl: string, index: number) => (
@@ -110,15 +117,15 @@ const FeaturedHorizontalCardSection: React.FC<Props> = ({
           
                 <View style={styles.cardContent}>
                   <Text style={styles.cardTitle} numberOfLines={1}>
-                    {item.title}
-                    {/* {item.templateName} */}
+                    
+                    {item.templateName}
                   </Text>
           
                   <Text style={styles.cardMeta}>
-                    {/* {item.eventType} | {item.templateStyle} */}
+                    {item.eventType} | {item.templateStyle}
                   </Text>
                 </View>
-              </View>
+          </TouchableOpacity>
         )}
       />
     </View>
@@ -151,29 +158,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   card: {
-    marginBottom: 10,
     overflow: 'hidden',
     maxWidth: 200,
-    marginHorizontal: 8,
+    marginHorizontal: 10,
   },
   
   imageWrapper: {
     position: 'relative',
     height: 250,
     width: 200,
-    borderRadius: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 1, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    borderRadius: 8,
     overflow: 'hidden',
   },
 
   image: {
     width: '100%',
     height: 250,
-    borderRadius: 10,
+    borderRadius: 8,
   },
 
   iconOverlay: {
@@ -218,13 +219,13 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 14,
     fontFamily: FontFamily.semibold,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#222',
   },
 
   cardMeta: {
     fontSize: 10,
-    color: '#777',
+    color: '#5c5c5c',
     marginTop: 2,
     textTransform: 'capitalize',
   },

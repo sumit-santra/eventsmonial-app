@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -53,9 +53,14 @@ interface Pagination {
 
 const ECardScreen = ({ navigation }: any) => {
 
+  const scrollViewRef = useRef<ScrollView>(null);
+  const categoryRefs = useRef<{ [key: string]: { x: number; width: number } }>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isCardType, setIsCardType] = useState<'card' | 'video'>('card');
+
+  const [showHeaderTitle, setShowHeaderTitle] = useState(true);
+  const lastScrollY = useRef(0);
 
   const [card, setCard] = useState<any>([]);
   const [videoCard, setVideoCard] = useState<any>([]);
@@ -129,8 +134,16 @@ const ECardScreen = ({ navigation }: any) => {
     }
   };
 
-  const handleCategoryChange = (category: string) => {
+  const handleCategoryChange = (category: string, index: number) => {
     setSelectedCategory(category);
+    
+    // Auto-scroll to selected category using measured position
+    if (scrollViewRef.current && categoryRefs.current[category]) {
+      const chipLayout = categoryRefs.current[category];
+      const scrollPosition = chipLayout.x - 20; // Offset by 20 to add padding
+      scrollViewRef.current.scrollTo({ x: Math.max(0, scrollPosition), animated: true });
+    }
+    
     const newFilters: Filters = {
       cardType: filters?.cardType ?? null,
       community: filters?.community ?? null,
@@ -144,6 +157,20 @@ const ECardScreen = ({ navigation }: any) => {
     setCard([]);
     setPage(1);
     fetchCardsList(1, false, newFilters);
+  };
+
+  const handleScroll = (event: any) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y;
+    
+    if (currentScrollY <= 0) {
+      setShowHeaderTitle(true);
+    } else if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+      setShowHeaderTitle(false);
+    } else if (currentScrollY < lastScrollY.current) {
+      setShowHeaderTitle(true);
+    }
+    
+    lastScrollY.current = currentScrollY;
   };
 
   const renderItem = ({ item }: any) => (
@@ -215,42 +242,49 @@ const ECardScreen = ({ navigation }: any) => {
 
   const renderHeader = () => (
     <View>
-      <View style={styles.header}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title}>{`E-Invites Cards`}</Text>
-          <Text style={styles.subtitle}>
-            Choose from beautifully designed <Text style={{ color: "#FF0762" }}> 300+</Text> templates
-          </Text>
-        </View>
+      {showHeaderTitle && (
+        <View style={[  styles.header, { paddingTop: 15 } ]}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.title}>{`E-Invites Cards`}</Text>
+            <Text style={styles.subtitle}>
+              Choose from beautifully designed <Text style={{ color: "#FF0762" }}> 300+</Text> templates
+            </Text>
+          </View>
 
-        <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.actionBtn}>
-            <MaterialIcons name="sort" size={18} color="#333" />
-            <Text style={styles.actionText}>Sort</Text>
-          </TouchableOpacity>
+          <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.actionBtn}>
+              <MaterialIcons name="sort" size={18} color="#333" />
+              <Text style={styles.actionText}>Sort</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionBtn}>
-            <MaterialIcons name="filter-list" size={18} color="#333" />
-            <Text style={styles.actionText}>Filter</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn}>
+              <MaterialIcons name="filter-list" size={18} color="#333" />
+              <Text style={styles.actionText}>Filter</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      )}
 
       <View style={styles.header}>
         <View style={{ flex: 1, paddingRight: 10 }}>
           <ScrollView
+            ref={scrollViewRef}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoryRow}
           >
-            {categories.map((item) => (
+            {categories.map((item, index) => (
               <TouchableOpacity
                 key={item}
                 style={[
                   styles.categoryChip,
                   selectedCategory === item && styles.activeChip,
                 ]}
-                onPress={() => handleCategoryChange(item)}
+                onPress={() => handleCategoryChange(item, index)}
+                onLayout={(event) => {
+                  const { x, width } = event.nativeEvent.layout;
+                  categoryRefs.current[item] = { x, width };
+                }}
               >
                 <Text
                   style={[
@@ -296,13 +330,15 @@ const ECardScreen = ({ navigation }: any) => {
 
 
   return (
-    <LinearGradient colors={['#FAF2F2', '#F8F8F9']} style={styles.container}>
+    <LinearGradient colors={['#F8F8F9', '#F8F8F9']} style={styles.container}>
       {/* Fixed Header */}
       <HomeHeader navigation={navigation} showCategories={false} isCategories={false} />
-      
+      <View style={{ paddingHorizontal: 20, paddingBottom: 10, }}>
+        {renderHeader()}
+      </View>
       {loading ? (
         <View style={styles.content}>
-          <Text style={styles.title}>{`E-Invites Cards`}</Text>
+          
           {renderSkeleton()}
         </View>
       ) : (
@@ -311,7 +347,9 @@ const ECardScreen = ({ navigation }: any) => {
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
           showsVerticalScrollIndicator={false}
-          ListHeaderComponent={renderHeader}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          // ListHeaderComponent={renderHeader}
           ListEmptyComponent={
             <NoDataComponent 
               icon="card-giftcard" 
@@ -402,7 +440,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 0,
-    paddingTop: 15,
+    paddingTop: 10,
   },
 
   title: {
@@ -456,7 +494,7 @@ const styles = StyleSheet.create({
   },
   
   content: {
-    paddingTop: 15,
+    // paddingTop: 15,
     paddingHorizontal: 20,
   },
 

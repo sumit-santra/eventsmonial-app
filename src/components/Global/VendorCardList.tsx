@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { getVendorStartingPrice } from '../../utils/vendorPricingUtils';
-import ImageSlider from './ImageSlider';
 import { FontFamily } from '../../theme/typography';
 
 interface VendorCardProps {
@@ -47,22 +46,20 @@ const Tag = ({ label, icon, color, bg }: TagProps) => {
 
 const VendorCardList = ({ item, categoryValue, navigation }: VendorCardProps) => {
   const pricing = getVendorStartingPrice(item, categoryValue);
-  const images = item?.images || [require('../../assets/images/default-image.webp')];
+  const imageSource = item?.images && item.images.length > 0 
+    ? { uri: item.images[0] } 
+    : require('../../assets/images/default-image.webp');
   
   const handleCardPress = () => {
     // Navigate to details page
     navigation?.navigate('VendorDetail', { vendorId: item.slug });
   };
   
-  const handleImageTouch = () => {
-    // Start autoplay on image touch
-  };
-  
   return (
     <TouchableOpacity style={styles.card} onPress={handleCardPress}>
         
-        <TouchableOpacity style={styles.imageWrapper} onPress={handleImageTouch}>
-          <ImageSlider images={images} itemId={item?._id} width="full" />
+        <View style={styles.imageWrapper}>
+          <Image source={imageSource} style={styles.image} />
 
           {/* Ratings */}
           <View style={styles.ratingRow}>
@@ -80,7 +77,7 @@ const VendorCardList = ({ item, categoryValue, navigation }: VendorCardProps) =>
               </Text>
             </View>
           </View>
-        </TouchableOpacity>
+        </View>
 
        
         <View style={styles.info}>
@@ -168,9 +165,16 @@ const styles = StyleSheet.create({
   },
 
   imageWrapper: {
-    // position: 'relative',
-    // width: '100%',
     overflow: 'hidden',
+    position: 'relative',
+    borderRadius: 8,
+    height: 130,
+  },
+
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 
   ratingRow: {

@@ -1091,7 +1091,7 @@ const styles = StyleSheet.create({
   infoCard: {
     flexDirection: 'row',
     padding: 8,
-    backgroundColor: 'rgba(255, 7, 98, 0.08)',
+    backgroundColor: '#f4f3ec',
     alignItems: 'flex-start',
     marginBottom: 8,
     borderRadius: 8,

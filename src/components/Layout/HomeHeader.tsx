@@ -62,7 +62,7 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
       </View>
 
       {/* Search */}
-      <View style={{ marginTop: 10, marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ marginTop: 10, marginBottom: 2, flexDirection: 'row', alignItems: 'center' }}>
         {isBackButton && (
           <TouchableOpacity style={styles.iconTopLeft} onPress={() => navigation.goBack()}>
             <MaterialIcons name="west" size={22} color="#888888" />
@@ -125,7 +125,7 @@ export default HomeHeader;
 const styles = StyleSheet.create({
   headerBg: {
     backgroundColor: '#FFF',
-    borderBottomColor: 'rgba(255, 7, 98, 0.1)',
+    borderBottomColor: 'rgba(255, 7, 98, 0.3)',
     borderBottomWidth: 1,
   },
 
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   category: {
     alignItems: 'center',
     marginRight: 18,
-    marginTop: 6,
+    marginTop: 2,
     width: 60,
   },
 
@@ -236,9 +236,10 @@ const styles = StyleSheet.create({
   },
 
   catText: {
-    marginTop: 6,
+    marginTop: 2,
     fontSize: 12,
-    color: '#666',
+    color: '#3f3f3f',
+    fontWeight: '500',
   },
 
   activeText: {

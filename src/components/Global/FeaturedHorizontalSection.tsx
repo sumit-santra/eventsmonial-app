@@ -8,14 +8,18 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
+import { FontFamily } from '../../theme/typography';
 
 type ItemType = {
-  id: string;
-  image: string;
-  rating: number;
-  views: string;
-  title: string;
-  location: string;
+  _id: string;
+  images: string[];
+  name: string;
+  address?: string;
+  city?: string;
+  location?: any;
+  rating: any;
+  slug: string;
+  services: any[];
 };
 
 type Props = {
@@ -25,6 +29,8 @@ type Props = {
   backgroundColor?: string;
   buttonColor?: string;
   items: ItemType[];
+  navigation: any;
+  loading?: boolean;
 };
 
 const FeaturedHorizontalSection: React.FC<Props> = ({
@@ -34,7 +40,29 @@ const FeaturedHorizontalSection: React.FC<Props> = ({
   backgroundColor = '#FFFFFF',
   buttonColor = '#FF0055',
   items,
+  navigation,
+  loading = false,
 }) => {
+
+  const renderSkeleton = () => (
+    <FlatList
+      data={Array.from({ length: 3 })}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      keyExtractor={(_, index) => `skeleton-${index}`}
+      contentContainerStyle={{ paddingHorizontal: 4 }}
+      renderItem={() => (
+        <View style={styles.card}>
+          <View style={styles.skeletonImage} />
+          <View style={styles.skeletonTitle} />
+          <View style={styles.skeletonLocation} />
+        </View>
+      )}
+    />
+  );
+
+
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
       {/* Header */}
@@ -49,43 +77,68 @@ const FeaturedHorizontalSection: React.FC<Props> = ({
       </View>
 
       {/* Horizontal List */}
-      <FlatList
-        data={items}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{ paddingHorizontal: 4 }}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            {/* Image */}
-            <Image source={{ uri: item.image }} style={styles.image} />
+      {loading ? (
+        renderSkeleton()
+      ) : (
+        <FlatList
+          data={items}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={item => item._id}
+          contentContainerStyle={{ paddingHorizontal: 4 }}
+          renderItem={({ item }) => {
+            const imageSource = item.images && item.images.length > 0 && item.images[0]
+              ? { uri: item.images[0] }
+              : require('../../assets/images/default-image.webp');
+            
+            return (
+              <TouchableOpacity 
+                style={styles.card} 
+                onPress={() => {
+                  if (navigation && item.slug) {
+                    navigation.push('VendorDetail', { vendorId: item.slug });
+                  }
+                }}
+              >
+                
+                <Image source={imageSource} style={styles.image} />
 
-            {/* Top Overlay */}
-            <View style={styles.overlay}>
-              <View style={styles.ratingBadge}>
-                <Text style={styles.ratingText}>★ {item.rating}</Text>
-              </View>
+              
+                <View style={styles.ratingRow}>
+                  <View style={styles.googleBadge}>
+                    <Image source={require('../../assets/images/google.png')} style={styles.googleIcon} />
+                    <Text style={styles.badgeText}>
+                      {item?.services[0]?.serviceInfo?.gmaps_rating || '0.0'}
+                    </Text>
+                  </View>
+      
+                  <View style={styles.starBadge}>
+                    <MaterialIcons name="star" size={14} color="#fff" />
+                    <Text style={styles.starText}>
+                      {item?.rating?.totalReviews?.toFixed(1) || 'N/A'}
+                    </Text>
+                  </View>
+                </View>
 
-              <View style={styles.viewBadge}>
-                <Text style={styles.viewText}>👁 {item.views}</Text>
-              </View>
-            </View>
+              
+                <Text style={styles.cardTitle} numberOfLines={1}>{item.name}</Text>
 
-            {/* Info */}
-            <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
-
-            <View style={styles.locationRow}>
-                <MaterialIcons
-                    name="location-on"
-                    size={14}
-                    color="#6B7280"
-                    style={styles.locationIcon}
-                />
-              <Text style={styles.locationText} numberOfLines={1}>{item.location}</Text>
-            </View>
-          </View>
-        )}
+                <View style={styles.locationRow}>
+                    <MaterialIcons
+                        name="location-on"
+                        size={14}
+                        color="#6B7280"
+                        style={styles.locationIcon}
+                    />
+                  <Text style={styles.locationText} numberOfLines={1}>
+                    {item.address || item.city || 'Location not available'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+        }}
       />
+      )}
     </View>
   );
 };
@@ -124,6 +177,53 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: 8,
   },
+
+  ratingRow: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    flexDirection: 'row',
+  },
+  
+  googleBadge: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 6,
+    alignItems: 'center',
+  },
+
+  googleIcon: {
+    width: 14,
+    height: 14,
+  },
+
+  badgeText: {
+    fontSize: 11,
+    fontFamily: FontFamily.medium,  
+    marginLeft: 4,
+    fontWeight: '600',
+  },
+
+  starBadge: {
+    flexDirection: 'row',
+    backgroundColor: '#FF0762',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    alignItems: 'center',
+  },
+
+  starText: {
+    fontSize: 11,
+    color: '#fff',
+    fontFamily: FontFamily.medium,
+    marginLeft: 4,
+    fontWeight: '600',
+  },
+
   overlay: {
     position: 'absolute',
     top: 10,
@@ -158,6 +258,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#111827',
+    paddingRight: 16,
   },
   locationRow: {
     flexDirection: 'row',
@@ -171,5 +272,29 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 12,
     color: '#6B7280',
+    paddingRight: 16,
+  },
+
+  skeletonImage: {
+    width: '100%',
+    height: 140,
+    borderRadius: 8,
+    backgroundColor: '#E0E0E0',
+  },
+
+  skeletonTitle: {
+    width: '80%',
+    height: 16,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 4,
+    marginTop: 8,
+  },
+
+  skeletonLocation: {
+    width: '60%',
+    height: 12,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 4,
+    marginTop: 4,
   },
 });
