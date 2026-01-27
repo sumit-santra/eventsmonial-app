@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
   ImageBackground,
+  Animated,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -23,6 +24,32 @@ const categories = [
 
 const HomeHeader = ({navigation, showCategories = true, isCategories = true, isBackButton = false }: { navigation: any; showCategories?: boolean; isCategories?: boolean; isBackButton?: boolean }) => {
   const [active, setActive] = useState(1);
+  const animatedValues = useRef<{ [key: number]: { scale: Animated.Value; color: Animated.Value } }>({});
+
+  useEffect(() => {
+    categories.forEach(item => {
+      if (!animatedValues.current[item.id]) {
+        animatedValues.current[item.id] = {
+          scale: new Animated.Value(1),
+          color: new Animated.Value(0),
+        };
+      }
+      
+      const isActive = active === item.id;
+      Animated.parallel([
+        Animated.timing(animatedValues.current[item.id].scale, {
+          toValue: isActive ? 1.05 : 1,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedValues.current[item.id].color, {
+          toValue: isActive ? 1 : 0,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    });
+  }, [active]);
 
   return (
     <ImageBackground 
@@ -62,42 +89,64 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
       </View>
 
       {/* Search */}
-      <View style={{ marginTop: 10, marginBottom: 2, flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ marginTop: 8, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }}>
         {isBackButton && (
           <TouchableOpacity style={styles.iconTopLeft} onPress={() => navigation.goBack()}>
             <MaterialIcons name="west" size={22} color="#888888" />
           </TouchableOpacity>
         )}
 
-        <View style={styles.searchBox}>
+        <TouchableOpacity
+          style={styles.searchBox}
+          onPress={() => navigation.navigate('Search')}
+          activeOpacity={0.7}
+        >
           <MaterialIcons name="search" size={20} color="#999" />
           <TextInput
             placeholder='Search any "Vendor"'
             placeholderTextColor="#999"
             style={styles.input}
+            editable={false}
           />
           <MaterialIcons name="mic" size={20} color="#999" />
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Categories */}
       {isCategories && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {categories.map(item => (
+          {categories.map(item => {
+            const bgColor = animatedValues.current[item.id]?.color.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['#ffffff', '#FF0762'],
+            }) || '#ffffff';
+
+            const borderColor = animatedValues.current[item.id]?.color.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['#ffffff', '#FF0762'],
+            }) || '#ffffff';
+
+            const scale = animatedValues.current[item.id]?.scale || new Animated.Value(1);
+
+            return (
             <TouchableOpacity
               key={item.id}
               style={styles.category}
               onPress={() => setActive(item.id)}
             >
                 {showCategories && (
-                    <View
+                    <Animated.View
                         style={[
                         styles.circle,
-                        active === item.id && styles.activeCircle,
+                        {
+                          backgroundColor: bgColor,
+                          borderColor: borderColor,
+                          transform: [{ scale }],
+                        },
                         ]}
                     >
                         <Image source={item.image} style={styles.categoryIcon} />
-                    </View>
+                    </Animated.View>
                 )}
 
               <Text
@@ -111,7 +160,8 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
 
               {active === item.id && <View style={styles.underline} />}
             </TouchableOpacity>
-          ))}
+            );
+          })}
         </ScrollView>
         )}
    
@@ -209,7 +259,6 @@ const styles = StyleSheet.create({
   category: {
     alignItems: 'center',
     marginRight: 18,
-    marginTop: 2,
     width: 60,
   },
 
@@ -236,7 +285,6 @@ const styles = StyleSheet.create({
   },
 
   catText: {
-    marginTop: 2,
     fontSize: 12,
     color: '#3f3f3f',
     fontWeight: '500',

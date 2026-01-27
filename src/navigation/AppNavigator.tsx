@@ -16,8 +16,10 @@ import VendorDetailScreen from '../screens/vendor/VendorDetailScreen';
 
 import TermsScreen from '../screens/auth/TermsScreen';
 import PrivacyScreen from '../screens/auth/PrivacyScreen';
+import SearchScreen from '../screens/search/SearchScreen';
 import BottomTabNavigator from './BottomTabNavigator';
 import ECardDetailScreen from '../screens/ecard/ECardDetailScreen';
+import WebSiteDetailScreen from '../screens/website/WebSiteDetailScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -35,6 +37,8 @@ export type RootStackParamList = {
   VendorDetail: undefined;
 
   ECardDetailScreen: { cardId: string; cardData: any };
+  WebSiteDetailScreen: { slug: string };
+  Search: undefined;
   
   Terms: undefined;
   Privacy: undefined;
@@ -68,6 +72,8 @@ const AppNavigator = () => {
         <Stack.Screen name="VendorDetail" component={VendorDetailScreen} />
 
         <Stack.Screen name="ECardDetailScreen" component={ECardDetailScreen} />
+        <Stack.Screen name="WebSiteDetailScreen" component={WebSiteDetailScreen} />
+        <Stack.Screen name="Search" component={SearchScreen} />
 
         <Stack.Screen name="Terms" component={TermsScreen} />
         <Stack.Screen name="Privacy" component={PrivacyScreen} />

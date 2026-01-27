@@ -23,6 +23,7 @@ const publicApi = {
     return response.json();
   },
 
+
   getAllBusinesses: async (params = {}) => {
     const queryParams = new URLSearchParams({
       page: '1',
@@ -46,6 +47,7 @@ const publicApi = {
     return response.json();
   },
 
+
   getVendorDetails: async (categorySlug) => {
     const response = await fetch(`${BASE_URL}/api/v1/planners/business-by-slug/${categorySlug}`, {
       method: 'GET',
@@ -63,7 +65,7 @@ const publicApi = {
 
 
   getAllcards: async (params = {}) => {
-    console.log('API Params:', params);
+    
     const queryParams = new URLSearchParams({ ...params}).toString();
     
     const response = await fetch(`${BASE_URL}/api/v1/multi-page-card-templates/templates?${queryParams}`, {
@@ -86,11 +88,73 @@ const publicApi = {
     return response.json();
   },
 
+
   getCardDetails: async (slug) => {
-
-    // https://api.dev.eventsmonial.com/api/v1/multi-page-card-templates/templates
-
     const response = await fetch(`${BASE_URL}/api/v1/multi-page-card-templates/templates/${slug}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
+  },
+
+ 
+  globalSearch: async (query, lat, lng, location) => {
+    const params = new URLSearchParams({
+      q: query,
+      ...(lat && { lat }),
+      ...(lng && { lng }),
+      ...(location && { location }),
+    }).toString();
+
+    const response = await fetch(`${BASE_URL}/api/v1/search?${params}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
+  },
+
+
+  getAllWebSite: async (params = {}) => {
+    const queryParams = new URLSearchParams({ ...params}).toString();
+    
+    const response = await fetch(`${BASE_URL}/api/v1/planners/website-templates`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      throw new Error(`Expected JSON, got: ${contentType}. Response: ${text.substring(0, 200)}`);
+    }
+    
+    return response.json();
+  },
+
+
+  getWebSiteDetails: async (slug) => {
+    
+    const response = await fetch(`${BASE_URL}/api/v1/planners/website-templates/slug/${slug}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
