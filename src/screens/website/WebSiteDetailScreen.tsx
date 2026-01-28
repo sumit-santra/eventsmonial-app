@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -48,7 +48,9 @@ const WebSiteDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
   const { webSlug } = route.params || {};
   const [webDetails, setWebDetails] = useState<Template | null>(null);
 
-  const [webHeight, setWebHeight] = useState(500);
+  const [webViewHeight, setWebViewHeight] = useState(400);
+
+  const webViewRef = useRef<WebView>(null);
  
 
   useEffect(() => {
@@ -111,6 +113,27 @@ const WebSiteDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
     }
   };
 
+  const getHeightJS = `
+    (function() {
+      const body = document.body;
+      const html = document.documentElement;
+
+      const height = Math.max(
+        body.scrollHeight,
+        body.offsetHeight,
+        html.clientHeight,
+        html.scrollHeight,
+        html.offsetHeight
+      );
+
+      window.ReactNativeWebView.postMessage(String(height));
+    })();
+    true;
+  `;
+
+
+  console.log('Web Details:', webViewHeight);
+
   return (
     <LinearGradient colors={['#F8F8F9', '#F8F8F9']} style={styles.container}>
       
@@ -137,14 +160,26 @@ const WebSiteDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
           <View style={styles.sliderContainer}>
             {webDetails?.htmlContent && (
               <WebView
+                ref={webViewRef}
                 originWhitelist={['*']}
                 source={{ html: webDetails.htmlContent }}
-                style={styles.webView}
+                style={{ height: webViewHeight, width: '100%' }}
                 javaScriptEnabled
                 domStorageEnabled
-                startInLoadingState
-                scalesPageToFit
-                showsVerticalScrollIndicator={false}
+                scrollEnabled={false}
+                showsVerticalScrollIndicator={true}
+                onLoadEnd={() => {
+                  setTimeout(() => {
+                    webViewRef.current?.injectJavaScript(getHeightJS);
+                  }, 600);
+                }}
+                onMessage={(event) => {
+                  const height = Number(event.nativeEvent.data);
+                  console.log('WebView height:', height);
+                  if (height > 0) {
+                    setWebViewHeight(height);
+                  }
+                }}
               />
             )}
 
@@ -197,9 +232,9 @@ const WebSiteDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
               </View>
 
               {webDetails.isTrending && (
-                <View style={[styles.metaChip, { backgroundColor: '#FFD700' }]}>
-                  <MaterialIcons name="trending-up" size={14} color="#333" />
-                  <Text style={[styles.metaText, { color: '#333' }]}>Trending</Text>
+                <View style={[styles.metaChip, { backgroundColor: '#fff5ec' }]}>
+                  <MaterialIcons name="trending-up" size={15} color="#ff7300" />
+                  <Text style={[styles.metaText, { color: '#ff7300' }]}>Trending</Text>
                 </View>
               )}
             </View>
@@ -301,7 +336,6 @@ const styles = StyleSheet.create({
   },
 
   sliderContainer: {
-    height: 500,
     backgroundColor: '#fff',
     marginHorizontal: 20,
     marginTop: 10,
@@ -384,6 +418,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
 
   metaText: {

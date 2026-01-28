@@ -28,6 +28,9 @@ interface Template {
   isActive: boolean;
   totalPages: number;
   previewImage: string;
+  views: number;
+  usageCount: number;
+  isNew: boolean;
 }
 
 interface Filters {
@@ -97,12 +100,7 @@ const WebsiteScreen = ({ navigation }: any) => {
       });
      
       const apiData = res?.data;
-
-      console.log('Website Templates Response:', apiData);
-
-      // setFilters(apiData?.filters);
       setPagination(apiData?.pagination);
-
       setCard((prev: Template[]) => [...prev, ...(apiData.templates as Template[])]);
 
     } catch (err) {
@@ -186,9 +184,28 @@ const WebsiteScreen = ({ navigation }: any) => {
           />
         )}
 
+
+        <View style={{ position: 'absolute', top: 8, left: 8, flexDirection: 'row', gap: 4 }}>
+          {item.isNew && (
+            <View style={styles.newBadge}>
+              <Text style={styles.newBadgeText}>NEW</Text>
+            </View>
+          )}
+
+          {item.isTrending && (
+            <View style={styles.trendingBadge}>
+              <Text style={styles.badgeText}>TRENDING</Text>
+            </View>
+          )}
+        </View>
+
+        <TouchableOpacity style={styles.rightIconBtnSmall}>
+          <MaterialIcons name="share" size={18} color="#fff" />
+        </TouchableOpacity>
+
         
         <View style={styles.iconOverlay}>
-         
+          
 
           <TouchableOpacity style={styles.iconBtnSmall}>
             <MaterialIcons name="favorite-border" size={18} color="#656565" />
@@ -332,6 +349,36 @@ const WebsiteScreen = ({ navigation }: any) => {
 export default WebsiteScreen;
 
 const styles = StyleSheet.create({
+
+  newBadge: {
+    
+    backgroundColor: '#b907ff',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    zIndex: 2,
+  },
+
+  newBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+
+  trendingBadge: {
+    
+    backgroundColor: '#FFA500',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    zIndex: 2,
+  },
+
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+  },
 
   categoryRow: {
     gap: 5,

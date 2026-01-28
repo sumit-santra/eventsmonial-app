@@ -12,14 +12,18 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
+import { useLocation } from '../../context/LocationContext';
+import { requestLocationPermission, getCurrentLocation } from '../../utils/getCurrentLocation';
+
+
 const categories = [
-  { id: 1, label: 'All', image: require('../../assets/images/all.png') },
-  { id: 2, label: 'E-Card', image: require('../../assets/images/ecard.png') },
-  { id: 3, label: 'Guest', image: require('../../assets/images/guest.png') },
-  { id: 4, label: 'Website', image: require('../../assets/images/website.png') },
-  { id: 5, label: 'Vendors', image: require('../../assets/images/vendors.png') },
-  { id: 6, label: 'Website', image: require('../../assets/images/website.png') },
-  { id: 7, label: 'Vendors', image: require('../../assets/images/vendors.png') },
+  { id: 1, label: 'All', link: 'MainTabs', image: require('../../assets/images/all.png') },
+  { id: 2, label: 'E-Card', link: 'E-Card', image: require('../../assets/images/ecard.png') },
+  { id: 3, label: 'Guest', link: 'Guests', image: require('../../assets/images/guest.png') },
+  { id: 4, label: 'Website', link: 'Website', image: require('../../assets/images/website.png') },
+  { id: 5, label: 'Vendors', link: 'Vendor', image: require('../../assets/images/vendors.png') },
+  { id: 6, label: 'Website', link: 'Website', image: require('../../assets/images/website.png') },
+  { id: 7, label: 'Vendors', link: 'Vendor', image: require('../../assets/images/vendors.png') },
 ];
 
 const HomeHeader = ({navigation, showCategories = true, isCategories = true, isBackButton = false }: { navigation: any; showCategories?: boolean; isCategories?: boolean; isBackButton?: boolean }) => {
@@ -51,6 +55,34 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
     });
   }, [active]);
 
+
+  const { location, setLocation } = useLocation();
+
+  useEffect(() => {
+    fetchLocation();
+    console.log('Location from context:', location);
+  }, []);
+
+  const fetchLocation = async () => {
+    const hasPermission = await requestLocationPermission();
+    if (!hasPermission) return;
+
+    try {
+      const { lat, lng } = await getCurrentLocation();
+
+      console.log('Current location:', lat, lng);
+
+      // TEMP: you can replace this with Google Reverse Geocode API
+      setLocation({
+        latitude: lat,
+        longitude: lng,
+        address: 'Current Location',
+      });
+    } catch (err) {
+      console.log('Location error', err);
+    }
+  };
+
   return (
     <ImageBackground 
       source={require('../../assets/images/header-bg.png')}
@@ -58,111 +90,109 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
     >
       <View style={styles.container}>
      
-      <View style={styles.topRow}>
-        <Image
-          source={require('../../assets/images/Logo-icon.png')} 
-          style={styles.logo}
-        />
+        <View style={styles.topRow}>
+          <Image
+            source={require('../../assets/images/Logo-icon.png')} 
+            style={styles.logo}
+          />
 
-        <TouchableOpacity style={styles.location}>
-          <MaterialIcons name="location-on" size={18} color="#FF0762" />
-          <Text style={styles.locationText} numberOfLines={1}>
-            HA 84 Salt lake City...
-          </Text>
-          <MaterialIcons name="keyboard-arrow-down" size={20} />
-        </TouchableOpacity>
-
-        <View style={styles.icons}>
-          <TouchableOpacity>
-            <MaterialIcons name="favorite-border" size={22} />
+          <TouchableOpacity style={styles.location} onPress={() => navigation.navigate('ChangeLocationScreen')}>
+            <MaterialIcons name="location-on" size={18} color="#FF0762" />
+            <Text style={styles.locationText} numberOfLines={1}>
+              {location.address}
+            </Text>
+            <MaterialIcons name="keyboard-arrow-down" size={20} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.bell}>
-            <MaterialIcons name="notifications-none" size={22} />
-            <View style={styles.dot} />
-          </TouchableOpacity>
+          <View style={styles.icons}>
+            <TouchableOpacity>
+              <MaterialIcons name="favorite-border" size={24} color="#888888" />
+            </TouchableOpacity>
 
-          <TouchableOpacity>
-            <MaterialIcons name="person-outline" size={22} />
+            <TouchableOpacity style={styles.bell}>
+              <MaterialIcons name="notifications-none" size={24} color="#888888" />
+              <View style={styles.dot} />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => navigation.navigate('ProfileScreen')}>
+              <MaterialIcons name="account-circle" size={24} color="#888888" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      
+        <View style={{ marginTop: 8, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }}>
+          {isBackButton && (
+            <TouchableOpacity style={styles.iconTopLeft} onPress={() => navigation.goBack()}>
+              <MaterialIcons name="west" size={22} color="#888888" />
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
+            style={styles.searchBox}
+            onPress={() => navigation.navigate('Search')}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons name="search" size={20} color="#999" />
+            <TextInput
+              placeholder='Search any "Vendor"'
+              placeholderTextColor="#999"
+              style={styles.input}
+              editable={false}
+            />
+            <MaterialIcons name="mic" size={20} color="#999" />
           </TouchableOpacity>
         </View>
-      </View>
+      
+        {isCategories && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {categories.map(item => {
+              const bgColor = animatedValues.current[item.id]?.color.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['#ffffff', '#FF0762'],
+              }) || '#ffffff';
 
-      {/* Search */}
-      <View style={{ marginTop: 8, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }}>
-        {isBackButton && (
-          <TouchableOpacity style={styles.iconTopLeft} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="west" size={22} color="#888888" />
-          </TouchableOpacity>
-        )}
+              const borderColor = animatedValues.current[item.id]?.color.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['#ffffff', '#FF0762'],
+              }) || '#ffffff';
 
-        <TouchableOpacity
-          style={styles.searchBox}
-          onPress={() => navigation.navigate('Search')}
-          activeOpacity={0.7}
-        >
-          <MaterialIcons name="search" size={20} color="#999" />
-          <TextInput
-            placeholder='Search any "Vendor"'
-            placeholderTextColor="#999"
-            style={styles.input}
-            editable={false}
-          />
-          <MaterialIcons name="mic" size={20} color="#999" />
-        </TouchableOpacity>
-      </View>
+              const scale = animatedValues.current[item.id]?.scale || new Animated.Value(1);
 
-      {/* Categories */}
-      {isCategories && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {categories.map(item => {
-            const bgColor = animatedValues.current[item.id]?.color.interpolate({
-              inputRange: [0, 1],
-              outputRange: ['#ffffff', '#FF0762'],
-            }) || '#ffffff';
-
-            const borderColor = animatedValues.current[item.id]?.color.interpolate({
-              inputRange: [0, 1],
-              outputRange: ['#ffffff', '#FF0762'],
-            }) || '#ffffff';
-
-            const scale = animatedValues.current[item.id]?.scale || new Animated.Value(1);
-
-            return (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.category}
-              onPress={() => setActive(item.id)}
-            >
-                {showCategories && (
-                    <Animated.View
-                        style={[
-                        styles.circle,
-                        {
-                          backgroundColor: bgColor,
-                          borderColor: borderColor,
-                          transform: [{ scale }],
-                        },
-                        ]}
-                    >
-                        <Image source={item.image} style={styles.categoryIcon} />
-                    </Animated.View>
-                )}
-
-              <Text
-                style={[
-                  styles.catText,
-                  active === item.id && styles.activeText,
-                ]}
+              return (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.category}
+                onPress={() => navigation.navigate(item.link, { categoryValue: item.label })}
               >
-                {item.label}
-              </Text>
+                  {showCategories && (
+                      <Animated.View
+                          style={[
+                          styles.circle,
+                          {
+                            backgroundColor: bgColor,
+                            borderColor: borderColor,
+                            transform: [{ scale }],
+                          },
+                          ]}
+                      >
+                          <Image source={item.image} style={styles.categoryIcon} />
+                      </Animated.View>
+                  )}
 
-              {active === item.id && <View style={styles.underline} />}
-            </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+                <Text
+                  style={[
+                    styles.catText,
+                    active === item.id && styles.activeText,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+
+                {active === item.id && <View style={styles.underline} />}
+              </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         )}
    
       </View>

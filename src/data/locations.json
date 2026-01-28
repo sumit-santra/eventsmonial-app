@@ -1,0 +1,79 @@
+[
+  {
+    "city": "Kolkata",
+    "areas": [
+      { "name": "Salt Lake Sector I", "zone": "East", "pincode": "700064" },
+      { "name": "Salt Lake Sector II", "zone": "East", "pincode": "700091" },
+      { "name": "Salt Lake Sector III", "zone": "East", "pincode": "700106" },
+      { "name": "Salt Lake Sector V", "zone": "East", "pincode": "700091" },
+
+      { "name": "New Town Action Area I", "zone": "East", "pincode": "700156" },
+      { "name": "New Town Action Area II", "zone": "East", "pincode": "700157" },
+      { "name": "New Town Action Area III", "zone": "East", "pincode": "700160" },
+      { "name": "Rajarhat", "zone": "East", "pincode": "700135" },
+
+      { "name": "Park Street", "zone": "Central", "pincode": "700016" },
+      { "name": "Esplanade", "zone": "Central", "pincode": "700069" },
+      { "name": "Sealdah", "zone": "Central", "pincode": "700014" },
+      { "name": "Chandni Chowk", "zone": "Central", "pincode": "700072" },
+      { "name": "Bowbazar", "zone": "Central", "pincode": "700012" },
+
+      { "name": "Shyambazar", "zone": "North", "pincode": "700004" },
+      { "name": "Bagbazar", "zone": "North", "pincode": "700003" },
+      { "name": "Belgachia", "zone": "North", "pincode": "700037" },
+      { "name": "Dum Dum", "zone": "North", "pincode": "700028" },
+      { "name": "Nagerbazar", "zone": "North", "pincode": "700074" },
+      { "name": "Sodepur", "zone": "North", "pincode": "700110" },
+      { "name": "Barrackpore", "zone": "North", "pincode": "700120" },
+
+      { "name": "Garia", "zone": "South", "pincode": "700084" },
+      { "name": "Gariahat", "zone": "South", "pincode": "700019" },
+      { "name": "Jadavpur", "zone": "South", "pincode": "700032" },
+      { "name": "Tollygunge", "zone": "South", "pincode": "700033" },
+      { "name": "Behala", "zone": "South", "pincode": "700034" },
+      { "name": "Kalighat", "zone": "South", "pincode": "700026" },
+      { "name": "Alipore", "zone": "South", "pincode": "700027" },
+      { "name": "Ballygunge", "zone": "South", "pincode": "700019" },
+      { "name": "Kasba", "zone": "South", "pincode": "700042" },
+
+      { "name": "Mukundapur", "zone": "South-East", "pincode": "700099" },
+      { "name": "Ruby", "zone": "South-East", "pincode": "700107" },
+
+      { "name": "Howrah Maidan", "zone": "West", "pincode": "711101" },
+      { "name": "Shibpur", "zone": "West", "pincode": "711102" },
+      { "name": "Santragachi", "zone": "West", "pincode": "711104" },
+      { "name": "Bally", "zone": "West", "pincode": "711201" }
+    ]
+  },
+  {
+    "city": "Siliguri",
+    "areas": [
+      { "name": "Hill Cart Road", "zone": "Central", "pincode": "734001" },
+      { "name": "Sevoke Road", "zone": "Central", "pincode": "734001" },
+      { "name": "Pradhan Nagar", "zone": "Central", "pincode": "734003" },
+      { "name": "Ashram Para", "zone": "North", "pincode": "734001" },
+      { "name": "Matigara", "zone": "South", "pincode": "734010" },
+      { "name": "Bagdogra", "zone": "South", "pincode": "734421" },
+      { "name": "Khalpara", "zone": "East", "pincode": "734005" },
+      { "name": "Champasari", "zone": "North", "pincode": "734003" }
+    ]
+  },
+  {
+    "city": "Asansol",
+    "areas": [
+      { "name": "Asansol Court Area", "zone": "Central", "pincode": "713301" },
+      { "name": "Burnpur", "zone": "West", "pincode": "713325" },
+      { "name": "Hirapur", "zone": "East", "pincode": "713325" },
+      { "name": "Kulti", "zone": "West", "pincode": "713343" },
+      { "name": "Ushagram", "zone": "Central", "pincode": "713303" }
+    ]
+  },
+  {
+    "city": "Durgapur",
+    "areas": [
+      { "name": "City Centre", "zone": "Central", "pincode": "713216" },
+      { "name": "Benachity", "zone": "East", "pincode": "713213" },
+      { "name": "Bidhan Nagar", "zone": "South", "pincode": "713212" }
+    ]
+  }
+]

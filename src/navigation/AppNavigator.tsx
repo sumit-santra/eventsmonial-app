@@ -20,6 +20,8 @@ import SearchScreen from '../screens/search/SearchScreen';
 import BottomTabNavigator from './BottomTabNavigator';
 import ECardDetailScreen from '../screens/ecard/ECardDetailScreen';
 import WebSiteDetailScreen from '../screens/website/WebSiteDetailScreen';
+import ProfileScreen from '../screens/user/ProfileScreen';
+import ChangeLocationScreen from '../screens/user/ChangeLocationScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -30,6 +32,8 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   OTP: undefined;
   ResetPassword: undefined;
+  ProfileScreen: undefined;
+  ChangeLocationScreen: undefined;
 
   MainTabs: undefined;
 
@@ -63,6 +67,9 @@ const AppNavigator = () => {
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="OTP" component={OTPScreen} />
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+
+        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+        <Stack.Screen name="ChangeLocationScreen" component={ChangeLocationScreen} />
 
         <Stack.Screen name="MainTabs">
           {() => <BottomTabNavigator isAuthenticated={isAuthenticated} />}
