@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ScrollViewBase, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ScrollViewBase, Image, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -7,10 +7,76 @@ const SignUpScreen = ({ navigation }: any) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    mobile: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [errors, setErrors] = useState<any>({});
+
+  const isValidEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validateForm = () => {
+    let newErrors: any = {};
+
+    if (!form.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+
+    if (!form.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    }
+
+    if (!form.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!isValidEmail(form.email)) {
+      newErrors.email = 'Enter a valid email';
+    }
+
+    if (!form.mobile.trim()) {
+      newErrors.mobile = 'Mobile number is required';
+    } else if (form.mobile.length !== 10) {
+      newErrors.mobile = 'Enter valid 10 digit number';
+    }
+
+    if (!form.password) {
+      newErrors.password = 'Password is required';
+    } else if (form.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword = 'Confirm password is required';
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (!rememberMe) {
+      newErrors.terms = 'Please accept Terms & Conditions';
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleLogin = () => {
+    setLoading(true);
+    if (!validateForm()) return;
+    
+    
     navigation.navigate('OTP');
   };
+
+ 
 
   return (
     <ScrollView contentContainerStyle={styles.ScrollViewContainer}>
@@ -40,9 +106,13 @@ const SignUpScreen = ({ navigation }: any) => {
               placeholder="Enter your first name"
               placeholderTextColor="#aaa"
               style={styles.input}
-              keyboardType="email-address"
+              keyboardType="default"
               autoCapitalize="none"
+              onChangeText={(text) =>
+                setForm({ ...form, firstName: text })
+              }
             />
+            {errors.firstName && <Text style={styles.error}>{errors.firstName}</Text>}
           </View>
           <View style={{flex: 1, paddingLeft: 6,}}>
             <Text style={styles.label}>Last Name*</Text>
@@ -50,9 +120,13 @@ const SignUpScreen = ({ navigation }: any) => {
               placeholder="Enter your last name"
               placeholderTextColor="#aaa"
               style={styles.input}
-              keyboardType="email-address"
+              keyboardType="default"
               autoCapitalize="none"
+              onChangeText={(text) =>
+                setForm({ ...form, lastName: text })
+              }
             />
+            {errors.lastName && <Text style={styles.error}>{errors.lastName}</Text>}
           </View>
         </View>
 
@@ -64,7 +138,11 @@ const SignUpScreen = ({ navigation }: any) => {
           style={styles.input}
           keyboardType="email-address"
           autoCapitalize="none"
+          onChangeText={(text) =>
+            setForm({ ...form, email: text })
+          }
         />
+        {errors.email && <Text style={styles.error}>{errors.email}</Text>}
 
         <Text style={styles.label}>Mobile Number*</Text>
         
@@ -77,8 +155,12 @@ const SignUpScreen = ({ navigation }: any) => {
             style={styles.passwordInput}
             keyboardType="phone-pad"
             maxLength={10}
+            onChangeText={(text) =>
+              setForm({ ...form, mobile: text })
+            }
           />
         </View>
+        {errors.mobile && <Text style={styles.error}>{errors.mobile}</Text>}
 
         
 
@@ -91,11 +173,15 @@ const SignUpScreen = ({ navigation }: any) => {
             placeholderTextColor="#aaa"
             style={styles.passwordInput}
             secureTextEntry={!passwordVisible}
+            onChangeText={(text) =>
+              setForm({ ...form, password: text })
+            }
           />
           <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-            <MaterialIcons name={passwordVisible ? "visibility" : "visibility-off"} size={22} color="#999" />
+            <MaterialIcons name={passwordVisible ? "visibility" : "visibility-off"} size={20} color="#999" />
           </TouchableOpacity>
         </View>
+        {errors.password && <Text style={styles.error}>{errors.password}</Text>}
 
         <Text style={styles.label}>Confirm Password</Text>
         
@@ -105,11 +191,15 @@ const SignUpScreen = ({ navigation }: any) => {
             placeholderTextColor="#aaa"
             style={styles.passwordInput}
             secureTextEntry={!confirmPasswordVisible}
+            onChangeText={(text) =>
+              setForm({ ...form, confirmPassword: text })
+            }
           />
           <TouchableOpacity onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
-            <MaterialIcons name={confirmPasswordVisible ? "visibility" : "visibility-off"} size={22} color="#999" />
+            <MaterialIcons name={confirmPasswordVisible ? "visibility" : "visibility-off"} size={20} color="#999" />
           </TouchableOpacity>
         </View>
+        {errors.confirmPassword && <Text style={styles.error}>{errors.confirmPassword}</Text>}
 
         <View style={styles.row}>
           <TouchableOpacity style={styles.remember} onPress={() => setRememberMe(!rememberMe)}>
@@ -136,9 +226,16 @@ const SignUpScreen = ({ navigation }: any) => {
             </Text>
           </Text>
         </View>
+        <View style={{paddingTop: errors.terms ? 5:0}}>
+          {errors.terms && <Text style={styles.error}>{errors.terms}</Text>}
+        </View>
 
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          
           <Text style={styles.buttonText}>Register</Text>
+          {loading && (
+            <ActivityIndicator color="#fff" />
+          )}
         </TouchableOpacity>
 
         <Text style={[styles.signup, {paddingTop: 30}]}>
@@ -174,8 +271,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
 
+  error: {
+    color: '#ff3333',
+    fontSize: 12,
+    paddingBottom: 8,
+    marginTop: -8,
+  },
+
   countryCode: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#333',
     marginRight: 10,
   },
@@ -216,7 +320,7 @@ const styles = StyleSheet.create({
   },
 
   title: { 
-    fontSize: 30, 
+    fontSize: 25, 
     fontWeight: 'bold',  
     textAlign: 'center',
     paddingTop: 20,
@@ -226,10 +330,11 @@ const styles = StyleSheet.create({
   input: { 
     borderWidth: 1, 
     borderColor: '#ddd', 
-    padding: 15, 
-    borderRadius: 8, 
+    paddingHorizontal: 15, 
+    paddingVertical: 15,
+    borderRadius: 6, 
     marginBottom: 12, 
-    fontSize: 16 
+    fontSize: 15 
   },
 
   button: { 
@@ -237,17 +342,21 @@ const styles = StyleSheet.create({
     padding: 15, 
     borderRadius: 8, 
     marginTop: 22, 
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   buttonText: { 
     color: '#fff', 
     textAlign: 'center', 
     fontSize: 16, 
-    fontWeight: '600' 
+    fontWeight: '600',
+    paddingHorizontal: 5 
   },
 
   subTitle: {
-    fontSize: 10,
+    fontSize: 12,
     marginBottom: 30,
     textAlign: 'center',
     color: '#434E58'
@@ -261,7 +370,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#333',
     marginBottom: 6,
     marginTop: 2,

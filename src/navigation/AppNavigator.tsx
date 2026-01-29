@@ -22,6 +22,8 @@ import ECardDetailScreen from '../screens/ecard/ECardDetailScreen';
 import WebSiteDetailScreen from '../screens/website/WebSiteDetailScreen';
 import ProfileScreen from '../screens/user/ProfileScreen';
 import ChangeLocationScreen from '../screens/user/ChangeLocationScreen';
+import NotificationScreen from '../screens/user/NotificationScreen';
+import WishlistScreen from '../screens/user/WishlistScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -34,6 +36,8 @@ export type RootStackParamList = {
   ResetPassword: undefined;
   ProfileScreen: undefined;
   ChangeLocationScreen: undefined;
+  NotificationScreen: undefined;
+  WishlistScreen: undefined;
 
   MainTabs: undefined;
 
@@ -70,6 +74,8 @@ const AppNavigator = () => {
 
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
         <Stack.Screen name="ChangeLocationScreen" component={ChangeLocationScreen} />
+        <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
+        <Stack.Screen name="WishlistScreen" component={WishlistScreen} />
 
         <Stack.Screen name="MainTabs">
           {() => <BottomTabNavigator isAuthenticated={isAuthenticated} />}

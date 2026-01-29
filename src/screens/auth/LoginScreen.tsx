@@ -143,19 +143,20 @@ const styles = StyleSheet.create({
   },
 
   title: { 
-    fontSize: 30, 
+    fontSize: 25, 
     fontWeight: 'bold',  
     textAlign: 'center',
-    paddingTop: 50,
+    paddingTop: 30,
     paddingBottom: 6,
   },
   input: { 
     borderWidth: 1, 
     borderColor: '#ddd', 
-    padding: 15, 
-    borderRadius: 8, 
-    marginBottom: 15, 
-    fontSize: 16 
+    paddingHorizontal: 15, 
+    paddingVertical: 15,
+    borderRadius: 6, 
+    marginBottom: 12, 
+    fontSize: 15 
   },
   button: { 
     backgroundColor: '#FF0762', 
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
     fontWeight: '600' 
   },
   subTitle: {
-    fontSize: 10,
+    fontSize: 12,
     marginBottom: 20,
     textAlign: 'center',
     color: '#434E58'
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#333',
     marginBottom: 6,
     marginTop: 16,
@@ -252,14 +253,14 @@ const styles = StyleSheet.create({
 
   signup: {
     textAlign: 'center',
-    paddingTop: 35,
+    paddingTop: 20,
     color: '#555',
   },
 
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 30,
+    marginVertical: 25,
   },
   line: {
     flex: 1,

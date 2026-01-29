@@ -39,7 +39,7 @@ const BottomTabNavigator = ({ isAuthenticated }: { isAuthenticated: boolean }) =
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E5EA',
-          height: 60,
+          height: 90,
           paddingBottom: 10,
           paddingTop: 8,
         },

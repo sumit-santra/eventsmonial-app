@@ -105,11 +105,11 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
           </TouchableOpacity>
 
           <View style={styles.icons}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('WishlistScreen')}>
               <MaterialIcons name="favorite-border" size={24} color="#888888" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.bell}>
+            <TouchableOpacity style={styles.bell} onPress={() => navigation.navigate('NotificationScreen')}>
               <MaterialIcons name="notifications-none" size={24} color="#888888" />
               <View style={styles.dot} />
             </TouchableOpacity>
