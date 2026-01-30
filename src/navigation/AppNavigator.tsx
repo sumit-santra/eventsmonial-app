@@ -24,6 +24,7 @@ import ProfileScreen from '../screens/user/ProfileScreen';
 import ChangeLocationScreen from '../screens/user/ChangeLocationScreen';
 import NotificationScreen from '../screens/user/NotificationScreen';
 import WishlistScreen from '../screens/user/WishlistScreen';
+import PasswordOTPScreen from '../screens/auth/PasswordOTPScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -34,6 +35,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   OTP: undefined;
   ResetPassword: undefined;
+  PasswordOTPScreen: undefined;
   ProfileScreen: undefined;
   ChangeLocationScreen: undefined;
   NotificationScreen: undefined;
@@ -69,6 +71,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="PasswordOTPScreen" component={PasswordOTPScreen} />
         <Stack.Screen name="OTP" component={OTPScreen} />
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,14 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import HomeHeader from '../../components/Layout/HomeHeader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+type User = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  profileImage?: string;
+};
 
 const ProfileScreen = ({ navigation }: any) => {
   const menuItems = [
@@ -19,6 +27,43 @@ const ProfileScreen = ({ navigation }: any) => {
     { label: 'Change Password', icon: 'password' },
     { label: 'Help and Support', icon: 'help-outline' },
   ];
+
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const storedUser = await AsyncStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    };
+
+    loadUser();
+  }, []);
+
+
+  const handelLogout = async () => {
+
+    try {
+      await AsyncStorage.multiRemove([
+        'user',
+        'accessToken',
+        'refreshToken',
+        'isLoggedIn',
+      ]);
+
+      console.log('User logged out');
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+
+    } catch (error) {
+      console.log('Logout error:', error);
+    }
+    
+  };
 
   return (
     <View style={styles.container}>
@@ -36,14 +81,16 @@ const ProfileScreen = ({ navigation }: any) => {
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
             <Image
-              source={{ uri: 'https://i.pravatar.cc/150?img=3' }}
+              source={{
+                uri: user?.profileImage || 'https://i.pravatar.cc/150?img=3',
+              }}
               style={styles.avatar}
             />
           </View>
 
           <View style={styles.profileInfo}>
-            <Text style={styles.name}>Brooklyn Simmons</Text>
-            <Text style={styles.email}>brooklyn@gmail.com</Text>
+            <Text style={styles.name}>{user ? `${user.firstName} ${user.lastName}` : ''}</Text>
+            <Text style={styles.email}>{user?.email}</Text>
           </View>
 
           <TouchableOpacity style={styles.editBtn}>
@@ -62,7 +109,7 @@ const ProfileScreen = ({ navigation }: any) => {
         </View>
 
     
-        <TouchableOpacity style={styles.logoutBtn}>
+        <TouchableOpacity onPress={() => handelLogout()} style={styles.logoutBtn}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
 
@@ -137,6 +184,7 @@ const styles = StyleSheet.create({
       fontSize: 16,
       fontWeight: '600',
       color: '#111',
+      textTransform: 'capitalize',
     },
 
     email: {

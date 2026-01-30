@@ -179,10 +179,10 @@ const NotificationScreen: React.FC = ({ navigation }: any) => {
                 renderItem={renderItem}
                 contentContainerStyle={styles.emptyContainer}
                 ListEmptyComponent={
-                <NoDataComponent 
-                icon="notifications-active" 
-                text="No notifications found."
-                />
+                  <NoDataComponent 
+                  icon="notifications-active" 
+                  text="No notifications found."
+                  />
                 }
 
                 refreshControl={

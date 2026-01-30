@@ -3,6 +3,7 @@ import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import { LocationProvider } from './src/context/LocationContext';
+import Toast from 'react-native-toast-message';
 
 // Suppress InteractionManager deprecation warning from React Navigation
 console.warn = (function(oriLogFunc) {
@@ -18,12 +19,17 @@ function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
+    <>
     <SafeAreaProvider>
+      
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <LocationProvider>
+         
         <AppNavigator />
       </LocationProvider>
     </SafeAreaProvider>
+    <Toast />
+    </>
   );
 }
 

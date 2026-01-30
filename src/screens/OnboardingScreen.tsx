@@ -72,7 +72,7 @@ const OnboardingScreen = ({ navigation }: any) => {
                 <Text style={styles.footer}>
                   Don't have an account?{' '}
                 </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                   <Text style={{ color: '#ff0066', fontSize: 16, fontWeight: '600' }}>Register</Text>
                 </TouchableOpacity>
               </View>

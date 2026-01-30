@@ -26,7 +26,7 @@ const ResetPasswordScreen = ({ navigation, route }: any) => {
             <MaterialIcons name="west" color="#5D5D5D" size={20} />
           </TouchableOpacity>
           
-          <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+          <TouchableOpacity onPress={() => navigation.navigate('MainTabs')}>
             <Text style={styles.skip}>SKIP</Text>
           </TouchableOpacity>
         </View>

@@ -10,15 +10,25 @@ const SplashScreen = ({ navigation }: any) => {
   const checkFirstTime = async () => {
     try {
       const hasLaunched = await AsyncStorage.getItem('hasLaunched');
+      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+
       setTimeout(() => {
-        if (hasLaunched === null) {
+        
+        if (!hasLaunched) {
           AsyncStorage.setItem('hasLaunched', 'true');
           navigation.replace('Onboarding');
-        } else {
-          navigation.replace('Login');
+          return;
         }
+
+        if (isLoggedIn === 'true') {
+          navigation.replace('MainTabs');
+          return;
+        }
+
+        navigation.replace('Login');
       }, 2000);
     } catch (error) {
+      console.log('checkFirstTime error:', error);
       navigation.replace('Onboarding');
     }
   };

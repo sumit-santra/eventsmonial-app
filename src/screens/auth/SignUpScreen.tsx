@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ScrollViewBase, Image, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import authApi from '../../services/authApi';
+import Toast from 'react-native-toast-message';
 
 const SignUpScreen = ({ navigation }: any) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -13,9 +15,10 @@ const SignUpScreen = ({ navigation }: any) => {
     firstName: '',
     lastName: '',
     email: '',
-    mobile: '',
+    phone: '',
     password: '',
-    confirmPassword: '',
+    confirmpassword: '',
+    userType: 'planner',
   });
   const [errors, setErrors] = useState<any>({});
 
@@ -41,10 +44,10 @@ const SignUpScreen = ({ navigation }: any) => {
       newErrors.email = 'Enter a valid email';
     }
 
-    if (!form.mobile.trim()) {
+    if (!form.phone.trim()) {
       newErrors.mobile = 'Mobile number is required';
-    } else if (form.mobile.length !== 10) {
-      newErrors.mobile = 'Enter valid 10 digit number';
+    } else if (form.phone.length !== 10) {
+      newErrors.phone = 'Enter valid 10 digit number';
     }
 
     if (!form.password) {
@@ -53,10 +56,10 @@ const SignUpScreen = ({ navigation }: any) => {
       newErrors.password = 'Password must be at least 8 characters';
     }
 
-    if (!form.confirmPassword) {
+    if (!form.confirmpassword) {
       newErrors.confirmPassword = 'Confirm password is required';
-    } else if (form.password !== form.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+    } else if (form.password !== form.confirmpassword) {
+      newErrors.confirmpassword = 'Passwords do not match';
     }
 
     if (!rememberMe) {
@@ -68,12 +71,45 @@ const SignUpScreen = ({ navigation }: any) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = () => {
-    setLoading(true);
+  const handleLogin = async () => {
+   
     if (!validateForm()) return;
+    setLoading(true);
+
+    try {
+       const res = await authApi.register(form);
+
+       if(res.data.success){
+        const verificationtoken = res.headers.get('verificationtoken');
+        Toast.show({
+          type: 'success',
+          text1: 'Registration Successful 🎉',
+          text2: 'Please verify OTP to continue',
+        });
+
+        navigation.navigate('OTP', { verificationtoken: verificationtoken, email: form.email});
+        
+       } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Registration Failed',
+          text2: res?.data.message || 'Something went wrong',
+        });
+       }
+
+    } catch (err: any){
+      console.log('err', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Registration Failed',
+        text2: err?.data?.message || 'Something went wrong',
+      });
+
+    } finally {
+      setLoading(false);
+    }
+
     
-    
-    navigation.navigate('OTP');
   };
 
  
@@ -89,7 +125,7 @@ const SignUpScreen = ({ navigation }: any) => {
             <MaterialIcons name="west" color="#5D5D5D" size={20} />
           </TouchableOpacity>
           
-          <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+          <TouchableOpacity onPress={() => navigation.navigate('MainTabs')}>
             <Text style={styles.skip}>SKIP</Text>
           </TouchableOpacity>
         </View>
@@ -156,11 +192,11 @@ const SignUpScreen = ({ navigation }: any) => {
             keyboardType="phone-pad"
             maxLength={10}
             onChangeText={(text) =>
-              setForm({ ...form, mobile: text })
+              setForm({ ...form, phone: text })
             }
           />
         </View>
-        {errors.mobile && <Text style={styles.error}>{errors.mobile}</Text>}
+        {errors.phone && <Text style={styles.error}>{errors.phone}</Text>}
 
         
 
@@ -192,14 +228,14 @@ const SignUpScreen = ({ navigation }: any) => {
             style={styles.passwordInput}
             secureTextEntry={!confirmPasswordVisible}
             onChangeText={(text) =>
-              setForm({ ...form, confirmPassword: text })
+              setForm({ ...form, confirmpassword: text })
             }
           />
           <TouchableOpacity onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
             <MaterialIcons name={confirmPasswordVisible ? "visibility" : "visibility-off"} size={20} color="#999" />
           </TouchableOpacity>
         </View>
-        {errors.confirmPassword && <Text style={styles.error}>{errors.confirmPassword}</Text>}
+        {errors.confirmpassword && <Text style={styles.error}>{errors.confirmpassword}</Text>}
 
         <View style={styles.row}>
           <TouchableOpacity style={styles.remember} onPress={() => setRememberMe(!rememberMe)}>
@@ -230,7 +266,7 @@ const SignUpScreen = ({ navigation }: any) => {
           {errors.terms && <Text style={styles.error}>{errors.terms}</Text>}
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <TouchableOpacity style={[styles.button, {opacity: loading ? 0.7 : 1}]} disabled={loading} onPress={handleLogin}>
           
           <Text style={styles.buttonText}>Register</Text>
           {loading && (
@@ -416,16 +452,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   checkboxChecked: {
     backgroundColor: '#FF0762',
     borderColor: '#FF0762',
   },
+
   rememberText: {
     fontSize: 14,
     color: '#666',
   },
-  
-  
 
   signup: {
     textAlign: 'center',
@@ -437,16 +473,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 30,
   },
+
   line: {
     flex: 1,
     height: 1,
     backgroundColor: '#eee',
   },
+
   or: {
     marginHorizontal: 10,
     fontSize: 12,
     color: '#aaa',
   },
+
   googleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -457,11 +496,13 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 12,
   },
+
   googleIcon: {
     width: 20,
     height: 20,
     marginRight: 20,
   },
+
   googleText: {
     fontSize: 14,
     fontWeight: '500',

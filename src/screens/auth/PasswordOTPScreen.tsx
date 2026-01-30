@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const OTP_LENGTH = 6;
 
 
-const OTPScreen = ({ navigation, route }: any) => {
+const PasswordOTPScreen = ({ navigation, route }: any) => {
 
   const inputs = useRef<Array<TextInput | null>>([]);
   const { verificationtoken, email } = route.params || {};
@@ -346,4 +346,4 @@ const styles = StyleSheet.create({
   
 });
 
-export default OTPScreen;
+export default PasswordOTPScreen;
