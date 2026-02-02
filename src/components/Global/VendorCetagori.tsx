@@ -49,10 +49,10 @@ const VendorCetagori = ({ navigation, categories = [], loading = false }: Vendor
             <FlatList
                 data={skeletonData}
                 renderItem={() => (
-                    <View style={styles.skeletonCard}>
-                        <View style={styles.skeletonImage} />
-                        <View style={styles.skeletonText} />
-                    </View>
+                  <View style={styles.skeletonCard}>
+                      <View style={styles.skeletonImage} />
+                      <View style={styles.skeletonText} />
+                  </View>
                 )}
                 keyExtractor={(_, index) => `skeleton-${index}`}
                 horizontal
@@ -98,7 +98,6 @@ const styles = StyleSheet.create({
   },
 
   listContent: {
-    paddingHorizontal: 20,
     gap: 15,
   },
 

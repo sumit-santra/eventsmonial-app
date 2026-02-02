@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
   RefreshControl,
 } from 'react-native';
@@ -11,11 +9,12 @@ import LinearGradient from 'react-native-linear-gradient';
 import HomeHeader from '../../components/Layout/HomeHeader';
 import FeaturedHorizontalSection from '../../components/Global/FeaturedHorizontalSection';
 import FeaturedHorizontalCardSection from '../../components/Global/FeaturedHorizontalCardSection';
-import PromoSwiper from '../../components/Global/PromoSwiper';
 import VendorCetagori from '../../components/Global/VendorCetagori';
 import publicApi from '../../services/publicApi';
 import HomeVideoCard from '../../components/Global/HomeVideoCard';
 import StartAssistantCard from '../../components/Global/StartAssistantCard';
+import protectedApi from '../../services/protectedApi';
+import MyEventSlider from '../../components/Global/MyEventSlider';
 
 const AuthHomeScreen = ({ navigation }: any) => {
   const [showCategories, setShowCategories] = useState(true);
@@ -27,6 +26,8 @@ const AuthHomeScreen = ({ navigation }: any) => {
   const [vendorsPhotography, setVendorsPhotography] = useState<any[]>([]);
   const [vendorsMakeup, setVendorsMakeup] = useState<any[]>([]);
   const [allCards, setAllCards] = useState<any[]>([]);
+  const [loadingEvent, setLoadingEvent] = useState(true);
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
     fetchVendorCategories();
@@ -34,7 +35,27 @@ const AuthHomeScreen = ({ navigation }: any) => {
     fetchVendorCategoriesList('photography');
     fetchVendorCategoriesList('bridalmakeup');
     fetchCardsList();
+    loadUpcomingEvents();
   }, []);
+
+  const loadUpcomingEvents = async () => {
+    try {
+      setLoadingEvent(true);
+      const res = await protectedApi.upcomingEvents();
+
+      console.log('upcomingEvents', res);
+
+      if (res?.success) {
+        setEvents(res.data || []);
+      } else {
+        setEvents([]);
+      }
+    } catch (err) {
+      console.log('Upcoming events error:', err);
+    } finally {
+      setLoadingEvent(false);
+    }
+  };
 
   const fetchVendorCategories = async () => {
     setLoadingCategories(true);
@@ -107,6 +128,7 @@ const AuthHomeScreen = ({ navigation }: any) => {
     await fetchVendorCategoriesList('venue');
     await fetchVendorCategoriesList('photography');
     await fetchVendorCategoriesList('bridalmakeup');
+    await loadUpcomingEvents();
     setTimeout(() => {
       setRefreshing(false);
     }, 1000);
@@ -136,10 +158,10 @@ const AuthHomeScreen = ({ navigation }: any) => {
         <View style={styles.content}>
 
           <View style={{ marginBottom: 20, paddingHorizontal: 20 }}>
-            <PromoSwiper />
+            <MyEventSlider navigation={navigation} events={events} loading={loadingEvent} />
           </View>
 
-          <View style={{ marginBottom: 20, paddingHorizontal: 0 }}>
+          <View style={{ marginBottom: 20, paddingHorizontal: 20 }}>
             <VendorCetagori navigation={navigation} categories={vendorCategories} loading={loadingCategories} />
           </View>
 

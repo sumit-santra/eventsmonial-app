@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -25,6 +25,7 @@ import ChangeLocationScreen from '../screens/user/ChangeLocationScreen';
 import NotificationScreen from '../screens/user/NotificationScreen';
 import WishlistScreen from '../screens/user/WishlistScreen';
 import PasswordOTPScreen from '../screens/auth/PasswordOTPScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -57,7 +58,24 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
+
+  
   const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+  useEffect(() => {
+    checkFirstTime();
+  }, []);
+
+  const checkFirstTime = async () => {
+    try {
+      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+      setIsAuthenticated(isLoggedIn ? true : false);
+      
+    } catch (error) {
+      console.log('checkFirstTime error:', error);
+    }
+  };
+  
   return (
     <NavigationContainer>
       <Stack.Navigator

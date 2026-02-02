@@ -20,8 +20,8 @@ const OTPScreen = ({ navigation, route }: any) => {
   const [timer, setTimer] = useState<number>(60);
   const [canResend, setCanResend] = useState<boolean>(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [error, setError] = useState(''); 
 
-  console.log('verificationtoken', verificationtoken)
 
   useEffect(() => {
     if (timer === 0) {
@@ -63,23 +63,19 @@ const OTPScreen = ({ navigation, route }: any) => {
 
   const handleOtpSubmit = async () => {
     const otpString = otp.join('');
-    console.log('OTP:', otpString);
-    console.log('verificationtoken:', verificationtoken);
-    
+
+    if(otpString.length !== 4){ 
+      setError('Please enter a valid OTP')
+      return;
+    }
     
     setLoading(true);
-
     try {
        const res = await authApi.verificationOtp(otpString, verificationtoken);
-
-       console.log(res);
        const userData = res.data.data.user
-
        if(res.data.success){
-
         const refreshToken = res.headers.get('refreshtoken');
           const accessToken = res.headers.get('accesstoken');
-
           await AsyncStorage.multiSet([
             ['user', JSON.stringify(userData)],
             ['accessToken', accessToken || ''],
@@ -187,33 +183,33 @@ const OTPScreen = ({ navigation, route }: any) => {
               <Text style={{color: '#ff0066', fontWeight: 700,}}>{email}</Text>
             </Text>
 
-
             <View style={styles.otpContainer}>
-            {otp.map((value, index) => (
-              <TextInput
-                key={index}
-                ref={(ref) => {
-                  if (ref) {
-                    inputs.current[index] = ref;
-                  }
-                }}
-                style={[
-                  styles.box,
-                  focusedIndex === index && styles.activeBox,
-                ]}
-                keyboardType="numeric"
-                maxLength={1}
-                value={value}
-                onChangeText={(text) => handleChange(text, index)}
-                onFocus={() => setFocusedIndex(index)}
-                onBlur={() => setFocusedIndex(null)}
-                autoFocus={index === 0}
-                secureTextEntry
-                textAlign="center"
-              />
-            ))}
+              {otp.map((value, index) => (
+                <TextInput
+                  key={index}
+                  ref={(ref) => {
+                    if (ref) {
+                      inputs.current[index] = ref;
+                    }
+                  }}
+                  style={[
+                    styles.box,
+                    focusedIndex === index && styles.activeBox,
+                  ]}
+                  keyboardType="numeric"
+                  maxLength={1}
+                  value={value}
+                  onChangeText={(text) => handleChange(text, index)}
+                  onFocus={() => setFocusedIndex(index)}
+                  onBlur={() => setFocusedIndex(null)}
+                  autoFocus={index === 0}
+                  secureTextEntry
+                  textAlign="center"
+                />
+              ))}
             </View>
-    
+
+            {error ? <Text style={styles.error}>{error}</Text> : null}
     
             <TouchableOpacity style={[styles.button, {opacity: loading ? 0.7 : 1}]} disabled={loading} onPress={handleOtpSubmit}>
               <Text style={styles.buttonText}>Continue</Text>
@@ -253,6 +249,13 @@ const styles = StyleSheet.create({
 
   ScrollViewContainer: {
     flexGrow: 1,
+  },
+
+  error: {
+    color: '#ff3333',
+    fontSize: 12,
+    paddingBottom: 8,
+    marginTop: 2,
   },
 
   container: {

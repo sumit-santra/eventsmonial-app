@@ -76,15 +76,78 @@ const authApi = {
     };
   },
 
-  forgotPassword: async (email) => {
-    const response = await fetch(`${BASE_URL}/auth/forgot-password`, {
+  forgotPassword: async (userData) => {
+   const response = await fetch(`${BASE_URL}/api/v1/forgot-password/request`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify(userData),
     });
-    return response.json();
+    const data = await response.json();
+
+    return {
+      status: response.status,
+      ok: response.ok,
+      headers: response.headers, 
+      data,
+    };
+  },
+
+  passwordVerificationOtp: async (userData, token) => {
+    const response = await fetch(`${BASE_URL}/api/v1/forgot-password/verify-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'resettoken': token,
+      },
+      body: JSON.stringify({otp: userData}),
+    });
+    const data = await response.json();
+
+    return {
+      status: response.status,
+      ok: response.ok,
+      headers: response.headers,
+      data,
+    };
+  },
+
+  passwordResendOTP: async (verificationtoken) => {
+    const response = await fetch(`${BASE_URL}/api/v1/forgot-password/resend-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'resettoken': verificationtoken,
+      },
+    });
+    const data = await response.json();
+
+    return {
+      status: response.status,
+      ok: response.ok,
+      headers: response.headers,
+      data,
+    };
+  },
+
+  resetPassword: async (userData, token) => {
+    const response = await fetch(`${BASE_URL}/api/v1/forgot-password/reset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'authtoken': token,
+      },
+      body: JSON.stringify(userData),
+    });
+    const data = await response.json();
+
+    return {
+      status: response.status,
+      ok: response.ok,
+      headers: response.headers,
+      data,
+    };
   },
 };
 

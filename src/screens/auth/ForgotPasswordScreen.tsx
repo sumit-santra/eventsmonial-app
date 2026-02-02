@@ -1,13 +1,77 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import Toast from 'react-native-toast-message';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import authApi from '../../services/authApi';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
-  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
-  const handleSendCode = () => {
-    navigation.navigate('ResetPassword', { email });
+  const [form, setForm] = useState({
+    email: '',
+    userType: 'planner',
+  });
+
+  const isValidEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validateForm = () => {
+    let newErrors: any = {};
+
+    if (!form.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!isValidEmail(form.email)) {
+      newErrors.email = 'Enter a valid email';
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSendCode = async () => {
+
+    if (!validateForm()) return;
+    setLoading(true);
+
+    try {
+      setLoading(true);
+
+      const response = await authApi.forgotPassword({
+        email: form.email,
+        userType: form.userType,
+      });
+
+      if(response.data.success){
+        const verificationtoken = response.headers.get('resettoken');
+        navigation.navigate('PasswordOTPScreen', { verificationtoken: verificationtoken, email: form.email});
+        Toast.show({
+          type: 'success',
+          text1: 'OTP Sent Successfully 📩',
+          text2: 'Please check your email',
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to send OTP',
+          text2: response?.data?.message || 'Please try again',
+        });
+      }
+      
+    } catch (error: any) {
+
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to send OTP',
+        text2: error.message || 'Please try again',
+      })
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,12 +103,19 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           style={styles.input}
           keyboardType="email-address"
           autoCapitalize="none"
+          onChangeText={(text) =>
+            setForm({ ...form, email: text })
+          }
         />
 
-        
+        {errors.email && <Text style={styles.error}>{errors.email}</Text>}
+
 
         <TouchableOpacity style={styles.button} onPress={handleSendCode}>
           <Text style={styles.buttonText}>Next</Text>
+          {loading && (
+            <ActivityIndicator color="#fff" />
+          )}
         </TouchableOpacity>
 
         <Text style={styles.signup}>
@@ -52,16 +123,24 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           <Text style={{ color: '#ff0066', fontWeight: 700, }} onPress={() => navigation.navigate('Login')}>Login</Text>
         </Text>
 
-        
       </LinearGradient>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+
+   error: {
+    color: '#ff3333',
+    fontSize: 12,
+    paddingBottom: 8,
+    marginTop: -8,
+  },
+
   ScrollViewContainer: {
     flexGrow: 1,
   },
+
   container: {
     paddingVertical: 50,
     paddingHorizontal: 20,
@@ -74,6 +153,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     alignItems: 'center',
   },
+
   backBtn: {
     width: 40,
     height: 40,
@@ -112,12 +192,16 @@ const styles = StyleSheet.create({
     padding: 15, 
     borderRadius: 8, 
     marginTop: 5, 
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: { 
     color: '#fff', 
     textAlign: 'center', 
     fontSize: 16, 
-    fontWeight: '600' 
+    fontWeight: '600',
+    paddingHorizontal: 5,
   },
   subTitle: {
     fontSize: 10,
