@@ -13,7 +13,8 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import { useLocation } from '../../context/LocationContext';
-import { requestLocationPermission, getCurrentLocation } from '../../utils/getCurrentLocation';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const categories = [
@@ -26,9 +27,21 @@ const categories = [
   { id: 7, label: 'Vendors', link: 'Vendor', image: require('../../assets/images/vendors.png') },
 ];
 
+type User = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  image?: string;
+};
+
+const DEFAULT_USER_IMAGE = require('../../assets/images/default-user.png');
+
 const HomeHeader = ({navigation, showCategories = true, isCategories = true, isBackButton = false }: { navigation: any; showCategories?: boolean; isCategories?: boolean; isBackButton?: boolean }) => {
   const [active, setActive] = useState(1);
   const animatedValues = useRef<{ [key: number]: { scale: Animated.Value; color: Animated.Value } }>({});
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const { location, setLocation } = useLocation();
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     categories.forEach(item => {
@@ -55,33 +68,25 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
     });
   }, [active]);
 
-
-  const { location, setLocation } = useLocation();
-
   useEffect(() => {
-    fetchLocation();
-    console.log('Location from context:', location);
+    checkLoginStatus();
   }, []);
 
-  const fetchLocation = async () => {
-    const hasPermission = await requestLocationPermission();
-    if (!hasPermission) return;
-
+  const checkLoginStatus = async () => {
     try {
-      const { lat, lng } = await getCurrentLocation();
+      const value = await AsyncStorage.getItem('isLoggedIn');
+      const storedUser = await AsyncStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
 
-      console.log('Current location:', lat, lng);
-
-      // TEMP: you can replace this with Google Reverse Geocode API
-      setLocation({
-        latitude: lat,
-        longitude: lng,
-        address: 'Current Location',
-      });
-    } catch (err) {
-      console.log('Location error', err);
+      setIsLoggedIn(value === 'true');
+    } catch (e) {
+      console.log('Login status error', e);
     }
   };
+
+  // console.log(user);
 
   return (
     <ImageBackground 
@@ -105,18 +110,39 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
           </TouchableOpacity>
 
           <View style={styles.icons}>
-            <TouchableOpacity onPress={() => navigation.navigate('WishlistScreen')}>
-              <MaterialIcons name="favorite-border" size={24} color="#888888" />
-            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.bell} onPress={() => navigation.navigate('NotificationScreen')}>
-              <MaterialIcons name="notifications-none" size={24} color="#888888" />
-              <View style={styles.dot} />
-            </TouchableOpacity>
+            {isLoggedIn ? (
+              <>
+                <TouchableOpacity onPress={() => navigation.navigate('WishlistScreen')}>
+                  <MaterialIcons name="favorite-border" size={24} color="#888888" />
+                </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('ProfileScreen')}>
-              <MaterialIcons name="account-circle" size={24} color="#888888" />
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.bell} onPress={() => navigation.navigate('NotificationScreen')}>
+                  <MaterialIcons name="notifications-none" size={24} color="#888888" />
+                  <View style={styles.dot} />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => navigation.navigate('ProfileScreen')}>
+                  <Image
+                      source={
+                        user?.image
+                          ? { uri: user.image }
+                          : DEFAULT_USER_IMAGE
+                      }
+                      style={styles.profileImage}
+                    />
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={() => navigation.navigate('Login')}
+              >
+                <Text style={styles.loginText}>Login</Text>
+              </TouchableOpacity>
+            )}
+
+            
           </View>
         </View>
       
@@ -203,6 +229,29 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
 export default HomeHeader;
 
 const styles = StyleSheet.create({
+
+  loginButton: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+
+  profileImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    resizeMode: 'cover',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+
+  loginText: {
+    color: '#7e7e7e',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+
   headerBg: {
     backgroundColor: '#FFF',
     borderBottomColor: 'rgba(255, 7, 98, 0.3)',

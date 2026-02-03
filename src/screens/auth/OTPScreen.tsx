@@ -89,10 +89,12 @@ const OTPScreen = ({ navigation, route }: any) => {
             text2: 'Welcome back!',
           });
 
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'MainTabs' }],
-          });
+          setTimeout(() => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'MainTabs' }],
+            });
+          }, 1000);
         
         Toast.show({
           type: 'success',

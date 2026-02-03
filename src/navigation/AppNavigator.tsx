@@ -26,6 +26,8 @@ import NotificationScreen from '../screens/user/NotificationScreen';
 import WishlistScreen from '../screens/user/WishlistScreen';
 import PasswordOTPScreen from '../screens/auth/PasswordOTPScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MyEventScreen from '../screens/myEvents/MyEventScreen';
+import EventDetailsScreen from '../screens/myEvents/EventDetailsScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -43,6 +45,9 @@ export type RootStackParamList = {
   WishlistScreen: undefined;
 
   MainTabs: undefined;
+
+  MyEvent: undefined;
+  EventDetails: undefined;
 
   VendorList: { categoryValue: string };
   VendorDetail: undefined;
@@ -69,7 +74,7 @@ const AppNavigator = () => {
   const checkFirstTime = async () => {
     try {
       const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
-      setIsAuthenticated(isLoggedIn ? true : false);
+      setIsAuthenticated(isLoggedIn === 'true' ? true : false);
       
     } catch (error) {
       console.log('checkFirstTime error:', error);
@@ -99,7 +104,7 @@ const AppNavigator = () => {
         <Stack.Screen name="WishlistScreen" component={WishlistScreen} />
 
         <Stack.Screen name="MainTabs">
-          {() => <BottomTabNavigator isAuthenticated={isAuthenticated} />}
+          {() => <BottomTabNavigator />}
         </Stack.Screen>
 
         <Stack.Screen name="VendorList" component={VendorListScreen} />
@@ -108,6 +113,9 @@ const AppNavigator = () => {
         <Stack.Screen name="ECardDetailScreen" component={ECardDetailScreen} />
         <Stack.Screen name="WebSiteDetailScreen" component={WebSiteDetailScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
+
+        <Stack.Screen name="MyEvent" component={MyEventScreen} />
+        <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
 
         <Stack.Screen name="Terms" component={TermsScreen} />
         <Stack.Screen name="Privacy" component={PrivacyScreen} />

@@ -1,11 +1,18 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { requestLocationPermission, getCurrentLocation } from '../utils/getCurrentLocation';
+import { useLocation } from '../context/LocationContext';
 
 const SplashScreen = ({ navigation }: any) => {
+  const { location, setLocation } = useLocation();
+
   useEffect(() => {
     checkFirstTime();
+     fetchLocation();
   }, []);
+
+  
 
   const checkFirstTime = async () => {
     try {
@@ -32,6 +39,26 @@ const SplashScreen = ({ navigation }: any) => {
       navigation.replace('Onboarding');
     }
   };
+
+  const fetchLocation = async () => {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) return;
+  
+      try {
+        const { lat, lng } = await getCurrentLocation();
+  
+        console.log('Current location:', lat, lng);
+  
+       
+        setLocation({
+          latitude: lat,
+          longitude: lng,
+          address: 'Current Location',
+        });
+      } catch (err) {
+        console.log('Location error', err);
+      }
+    };
 
   return (
 

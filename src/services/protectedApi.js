@@ -9,6 +9,20 @@ const protectedApi = {
     });
   },
 
+  allEvents: (eventType) => {
+    const query = eventType ? `?eventType=${eventType}` : '';
+
+    return secureFetch(`/planners/events/my-events${query}`, {
+      method: 'GET',
+    });
+  },
+
+  deleteEvent: (id) => {
+    return secureFetch(`/planners/events/delete-event/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
 
 
   getUserProfile: () => {

@@ -39,7 +39,6 @@ const authApi = {
   },
 
   verificationOtp: async (userData, token) => {
-    console.log(userData);
     const response = await fetch(`${BASE_URL}/api/v1/verify-otp`, {
       method: 'POST',
       headers: {

@@ -30,21 +30,18 @@ const AuthHomeScreen = ({ navigation }: any) => {
   const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
+    loadUpcomingEvents();
     fetchVendorCategories();
     fetchVendorCategoriesList('venue');
     fetchVendorCategoriesList('photography');
     fetchVendorCategoriesList('bridalmakeup');
     fetchCardsList();
-    loadUpcomingEvents();
   }, []);
 
   const loadUpcomingEvents = async () => {
+    setLoadingEvent(true);
     try {
-      setLoadingEvent(true);
       const res = await protectedApi.upcomingEvents();
-
-      console.log('upcomingEvents', res);
-
       if (res?.success) {
         setEvents(res.data || []);
       } else {
@@ -124,11 +121,12 @@ const AuthHomeScreen = ({ navigation }: any) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
+    await loadUpcomingEvents();
     await fetchVendorCategories();
     await fetchVendorCategoriesList('venue');
     await fetchVendorCategoriesList('photography');
     await fetchVendorCategoriesList('bridalmakeup');
-    await loadUpcomingEvents();
+    
     setTimeout(() => {
       setRefreshing(false);
     }, 1000);
@@ -158,13 +156,17 @@ const AuthHomeScreen = ({ navigation }: any) => {
         <View style={styles.content}>
 
           <View style={{ marginBottom: 20, paddingHorizontal: 20 }}>
-            <MyEventSlider navigation={navigation} events={events} loading={loadingEvent} />
+            <MyEventSlider navigation={navigation} events={events} loading={loadingEvent} 
+              title="My Events"
+              buttonText="View All"
+              buttonColor="#FF0055" 
+              onPressButton={() => navigation.navigate('MyEvent')}
+            />
           </View>
 
           <View style={{ marginBottom: 20, paddingHorizontal: 20 }}>
             <VendorCetagori navigation={navigation} categories={vendorCategories} loading={loadingCategories} />
           </View>
-
           
           <View style={{ paddingHorizontal: 20 }}>
             <FeaturedHorizontalSection

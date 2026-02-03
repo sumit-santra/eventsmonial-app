@@ -77,10 +77,14 @@ const LoginScreen = ({ navigation }: any) => {
             text2: 'Welcome back!',
           });
 
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'MainTabs' }],
-          });
+          setTimeout(() => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'MainTabs' }],
+            });
+          }, 1000);
+
+          
 
           
         } else {

@@ -61,7 +61,7 @@ const WebSiteDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
     setLoading(true);
     try {
       const res = await publicApi.getWebSiteDetails(webSlug);
-      console.log('Card Details Response:', res);
+      // console.log('Card Details Response:', res);
       setWebDetails(res?.data);
     } catch (err) {
       console.log('Error fetching card details:', err);
@@ -132,7 +132,6 @@ const WebSiteDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
   `;
 
 
-  console.log('Web Details:', webViewHeight);
 
   return (
     <LinearGradient colors={['#F8F8F9', '#F8F8F9']} style={styles.container}>
@@ -175,7 +174,6 @@ const WebSiteDetailScreen = ({ navigation, route }: ECardDetailScreenProps) => {
                 }}
                 onMessage={(event) => {
                   const height = Number(event.nativeEvent.data);
-                  console.log('WebView height:', height);
                   if (height > 0) {
                     setWebViewHeight(height);
                   }

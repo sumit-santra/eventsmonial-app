@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import VendorScreen from '../screens/vendor/VendorScreen';
@@ -7,10 +7,38 @@ import GuestScreen from '../screens/guest/GuestScreen';
 import GuestHome from '../screens/home/GuestHomeScreen';
 import AuthHome from '../screens/home/AuthHomeScreen';
 import WebsiteScreen from '../screens/website/WebsiteScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
-const BottomTabNavigator = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
+const BottomTabNavigator = () => {
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    checkLoginStatus();
+  }, []);
+
+  const checkLoginStatus = async () => {
+    try {
+      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+      setIsAuthenticated(isLoggedIn === 'true');
+    } catch (error) {
+      console.log('Auth check error:', error);
+      setIsAuthenticated(false);
+    }
+  };
+
+  // 🔄 Loader while checking auth
+  if (isAuthenticated === null) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#FF0762" />
+      </View>
+    );
+  }
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -56,3 +84,12 @@ const BottomTabNavigator = ({ isAuthenticated }: { isAuthenticated: boolean }) =
 };
 
 export default BottomTabNavigator;
+
+const styles = StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+});

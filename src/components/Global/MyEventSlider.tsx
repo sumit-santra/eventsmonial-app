@@ -10,11 +10,16 @@ import {
   ImageBackground,
 } from 'react-native';
 import { FontFamily } from '../../theme/typography';
+import LinearGradient from 'react-native-linear-gradient';
 
 interface eventProps {
   navigation: any;
   events: any[];
   loading?: boolean;
+  title: string;
+  buttonText?: string;
+  buttonColor?: string;
+  onPressButton?: () => void;
 }
 
 const EVENT_IMAGES: Record<string, any> = {
@@ -23,16 +28,24 @@ const EVENT_IMAGES: Record<string, any> = {
   engagement: require('../../assets/images/Engagement.jpg'),
   birthday: require('../../assets/images/Birthday.jpg'),
   puja: require('../../assets/images/pooja.jpg'),
-  other: require('../../assets/images/others-event.jpg'),
+  other: require('../../assets/images/party.jpg'),
 };
 
-const EVENT_BG_COLORS: Record<string, string> = {
-  wedding: '#fff1fc',      // soft pink
-  anniversary: '#e5ecfd',  // soft blue
-  engagement: '#fef3e5',   // peach
-  birthday: '#ceffe6',     // yellow tint
-  puja: '#fcefd3',         // light green
-  other: '#eeeff2',        // default
+const EVENT_GRADIENTS: Record<string, string[]> = {
+  wedding: ['rgba(255,241,252,0.0)', '#ff1837'],
+  anniversary: ['rgba(229,236,253,0.0)', '#ff0285'],
+  engagement: ['rgba(254,243,229,0.0)', '#ea02fb'],
+  birthday: ['rgba(206,255,230,0.0)', '#0648e2'],
+  puja: ['rgba(252,239,211,0.0)', '#ffbb00'],
+  other: ['rgba(0,0,0,0.0)', '#454107'],
+};
+const EVENT_DAY_COLORS: Record<string, string> = {
+  wedding: '#FF1837',
+  anniversary: '#ff0285',
+  engagement: '#EA02FB',
+  birthday: '#0648e2',
+  puja: '#FFBB00',
+  other: '#454107',
 };
 
 const { width } = Dimensions.get('window');
@@ -41,39 +54,74 @@ const SPACING = 16;
 
 // const { width } = Dimensions.get('window');
 
-const MyEventSlider = ({ navigation, events = [], loading = false }: eventProps) => {
+const MyEventSlider = ({ navigation, events = [], loading = false, title, buttonText, buttonColor, onPressButton }: eventProps) => {
 
   const getBgImage = (type: string) => {
     return EVENT_IMAGES[type?.toLowerCase()] || EVENT_IMAGES.other;
   };
 
-  const getCardBgColor = (type: string) => {
-    return EVENT_BG_COLORS[type?.toLowerCase()] || EVENT_BG_COLORS.other;
+  const getCountdown = (eventDate: string) => {
+    const now = new Date().getTime();
+    const eventTime = new Date(eventDate).getTime();
+    let diff = eventTime - now;
+
+    if (diff <= 0) return 'Today';
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    diff %= 1000 * 60 * 60 * 24;
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    diff %= 1000 * 60 * 60;
+
+    const minutes = Math.floor(diff / (1000 * 60));
+
+    if (days > 0) return `${days}Day ${hours} : ${minutes}`;
+    if (hours > 0) return `${hours} : ${minutes}`;
+    return `00 : ${minutes}`;
   };
+
+
+  const getGradientColors = (eventType: string) => EVENT_GRADIENTS[eventType] || EVENT_GRADIENTS.other;
+
+  const getDayColor = (eventType: string) =>  EVENT_DAY_COLORS[eventType] || EVENT_DAY_COLORS.other;
 
   const renderItem = ({ item }: any) => {
     return (
-      <View style={styles.cardWrapper}>
-        <View style={[styles.card, { backgroundColor: getCardBgColor(item.eventType) }]}>
-          {/* IMAGE */}
-          <Image
-            source={getBgImage(item.eventType)}
-            style={styles.cardImage}
-          />
+      <TouchableOpacity style={styles.cardWrapper} onPress={() => navigation.navigate('EventDetails', { cardData: item })}>
+        <ImageBackground
+          source={getBgImage(item.eventType)}
+          style={styles.card}
+          imageStyle={styles.cardImage} // for borderRadius etc
+        >
 
-          <View style={styles.cardContent}>
+          <View style={styles.countdownBadge}>
+            <Text style={styles.countdownText}>
+              {getCountdown(item.eventDate)}
+            </Text>
+          </View>
+
+          <LinearGradient
+            colors={getGradientColors(item.eventType)}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.cardContent}
+          >
             <View style={styles.dateBox}>
               <Text style={styles.month}>
-                {new Date(item.eventDate).toLocaleString('en-US', { month: 'short' }).toUpperCase()}
+                {new Date(item.eventDate)
+                  .toLocaleString('en-US', { month: 'short' })
+                  .toUpperCase()}
               </Text>
-              <Text style={styles.day}>
+              <Text style={[
+                styles.day,
+                { color: getDayColor(item.eventType) },
+              ]}>
                 {new Date(item.eventDate).getDate()}
               </Text>
             </View>
 
-            
             <View style={styles.info}>
-              <Text style={styles.title} numberOfLines={1}>
+              <Text style={styles.title} numberOfLines={2}>
                 {item.displayName || 'My Event'}
               </Text>
 
@@ -81,30 +129,95 @@ const MyEventSlider = ({ navigation, events = [], loading = false }: eventProps)
                 {item.eventCity}
               </Text>
             </View>
+          </LinearGradient>
+        </ImageBackground>
+      </TouchableOpacity>
+    );
+  };
+
+  const SkeletonCard = () => {
+    return (
+      <View style={styles.cardWrapper}>
+        <View style={[styles.card, styles.skeletonCard]}>
+          <View style={styles.skeletonBadge} />
+
+          <View style={styles.skeletonContent}>
+            <View style={styles.skeletonDateBox} />
+
+            <View style={{ flex: 1 }}>
+              <View style={styles.skeletonTitle} />
+              <View style={styles.skeletonCity} />
+            </View>
           </View>
         </View>
       </View>
     );
   };
 
-
-  console.log('events', events);
+  const renderSkeleton = () => (
+    <FlatList
+      data={[1, 2, 3]}
+      keyExtractor={(item) => item.toString()}
+      renderItem={() => <SkeletonCard />}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      snapToInterval={CARD_WIDTH + SPACING}
+      decelerationRate="fast"
+    />
+  );
 
 
   return (
     
     <View>
-    
-       <FlatList
-        data={events}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={CARD_WIDTH + SPACING}
-        decelerationRate="fast"
-      />
+
+      {loading ? (
+        renderSkeleton()
+      ) : events && events.length > 0 ? ( 
+        <View>
+     
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>{title}</Text>
+
+            <TouchableOpacity onPress={onPressButton}>
+              <Text style={[styles.viewAll, { color: buttonColor }]}>
+                {buttonText}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={events}
+            keyExtractor={(item) => item._id}
+            renderItem={renderItem}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={CARD_WIDTH + SPACING}
+            decelerationRate="fast"
+          />
+        </View>
+      ):(
+        <ImageBackground
+          source={require('../../assets/images/event-create.jpg')} // change path
+          style={styles.noEventCard}
+          imageStyle={styles.noEventBgImage}
+        >
+          <Text style={{fontSize: 28, color: '#000000', paddingBottom: 1, textAlign: 'center'}}>
+            Let's create it together.
+          </Text>
+
+          <Text style={styles.noEventCardTitle}>
+            <Text style={{fontWeight:'bold', color: '#FF0055'}} >Your story deserves</Text> the perfect celebration.
+          </Text>
+
+          <View style={{paddingHorizontal: 20, paddingTop: 10, alignItems: 'center'}}>
+            <TouchableOpacity style={{backgroundColor:'#FF0055', paddingHorizontal:20, paddingVertical:10, borderRadius:8, marginTop:10}}>
+              <Text style={{fontSize: 14, fontWeight:'600', color:'white', textAlign: 'center'}}>Start your event journey</Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
+      )}
      
     </View>
     
@@ -115,9 +228,67 @@ const MyEventSlider = ({ navigation, events = [], loading = false }: eventProps)
 export default MyEventSlider;
 
 const styles = StyleSheet.create({
+
+  noEventCard: {
+    borderRadius: 16,
+    overflow: 'hidden', 
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 30
+  },
+
+  noEventBgImage: {
+    borderRadius: 16,
+    resizeMode: 'cover',
+  },
+
+  noEventCardTitle:{
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#000000',
+    marginBottom: 5,
+    textAlign: 'center',
+    textTransform: 'capitalize',
+  },
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#111827',
+  },
+
+  viewAll: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  countdownBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+
+  countdownText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
   cardWrapper: {
     width: CARD_WIDTH,
-    marginRight: 16,
+    marginRight: SPACING,
   },
 
   card: {
@@ -125,7 +296,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     overflow: 'hidden',
     justifyContent: 'flex-end',
-    padding: 10,
   },
 
   image: {
@@ -144,8 +314,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 
- 
-
   date: {
     color: '#ddd',
     fontSize: 18,
@@ -153,36 +321,36 @@ const styles = StyleSheet.create({
   },
 
   cardImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
     borderRadius: 15,
   },
 
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 150,
+    paddingBottom: 16,
   },
 
   dateBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: '#F4F6FA',
+    width: 55,
+    height: 65,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
 
   month: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
     color: '#7A7A7A',
+    marginBottom: 5,
   },
 
   day: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '800',
     color: '#000',
     lineHeight: 20,
@@ -193,15 +361,61 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#000',
+    color: '#ffffff',
   },
 
   city: {
     fontSize: 13,
-    color: '#7A7A7A',
-    marginTop: 4,
+    color: '#ffffff',
+    marginTop: 2,
+  },
+
+
+  skeletonCard: {
+    backgroundColor: '#E5E7EB',
+  },
+
+  skeletonBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 70,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#D1D5DB',
+  },
+
+  skeletonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 150,
+    paddingBottom: 16,
+  },
+
+  skeletonDateBox: {
+    width: 55,
+    height: 65,
+    borderRadius: 8,
+    backgroundColor: '#D1D5DB',
+    marginRight: 12,
+  },
+
+  skeletonTitle: {
+    height: 18,
+    width: '80%',
+    borderRadius: 6,
+    backgroundColor: '#D1D5DB',
+    marginBottom: 8,
+  },
+
+  skeletonCity: {
+    height: 14,
+    width: '50%',
+    borderRadius: 6,
+    backgroundColor: '#D1D5DB',
   },
 });
 
