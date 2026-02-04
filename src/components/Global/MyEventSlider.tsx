@@ -32,19 +32,19 @@ const EVENT_IMAGES: Record<string, any> = {
 };
 
 const EVENT_GRADIENTS: Record<string, string[]> = {
-  wedding: ['rgba(255,241,252,0.0)', '#ff1837'],
-  anniversary: ['rgba(229,236,253,0.0)', '#ff0285'],
-  engagement: ['rgba(254,243,229,0.0)', '#ea02fb'],
-  birthday: ['rgba(206,255,230,0.0)', '#0648e2'],
-  puja: ['rgba(252,239,211,0.0)', '#ffbb00'],
+  wedding: ['rgba(255,241,252,0.0)', '#d50d28'],
+  anniversary: ['rgba(229,236,253,0.0)', '#d50671'],
+  engagement: ['rgba(254,243,229,0.0)', '#c405d2'],
+  birthday: ['rgba(206,255,230,0.0)', '#0c4f9c'],
+  puja: ['rgba(252,239,211,0.0)', '#d19b04'],
   other: ['rgba(0,0,0,0.0)', '#454107'],
 };
 const EVENT_DAY_COLORS: Record<string, string> = {
-  wedding: '#FF1837',
-  anniversary: '#ff0285',
-  engagement: '#EA02FB',
-  birthday: '#0648e2',
-  puja: '#FFBB00',
+  wedding: '#d50d28',
+  anniversary: '#d50671',
+  engagement: '#c405d2',
+  birthday: '#0c4f9c',
+  puja: '#d19b04',
   other: '#454107',
 };
 
@@ -75,9 +75,9 @@ const MyEventSlider = ({ navigation, events = [], loading = false, title, button
 
     const minutes = Math.floor(diff / (1000 * 60));
 
-    if (days > 0) return `${days}Day ${hours} : ${minutes}`;
-    if (hours > 0) return `${hours} : ${minutes}`;
-    return `00 : ${minutes}`;
+    if (days > 0) return `${days}Day ${hours}:${minutes}`;
+    if (hours > 0) return `${hours}:${minutes}`;
+    return `00:${minutes}`;
   };
 
 

@@ -10,6 +10,7 @@ import {
   Image,
   ImageBackground,
   Alert,
+  Animated,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import HomeHeader from '../../components/Layout/HomeHeader';
@@ -29,12 +30,12 @@ const EVENT_IMAGES: Record<string, any> = {
 };
 
 const EVENT_GRADIENTS: Record<string, string[]> = {
-  wedding: ['rgba(255,241,252,0.0)', '#fff9f0'],
-  anniversary: ['rgba(229,236,253,0.0)', '#fff5fa'],
-  engagement: ['rgba(254,243,229,0.0)', '#f8ecf9'],
-  birthday: ['rgba(206,255,230,0.0)', '#edf2fe'],
-  puja: ['rgba(252,239,211,0.0)', '#faf4e6'],
-  other: ['rgba(0,0,0,0.0)', '#f3f2eb'],
+  wedding: ['rgba(255,241,252,0.0)', '#faeedc'],
+  anniversary: ['rgba(229,236,253,0.0)', '#f9d8e8'],
+  engagement: ['rgba(254,243,229,0.0)', '#f6d2fa'],
+  birthday: ['rgba(206,255,230,0.0)', '#cfdcfb'],
+  puja: ['rgba(252,239,211,0.0)', '#f6e7c5'],
+  other: ['rgba(0,0,0,0.0)', '#dbd9d1'],
 };
 
 const EVENT_DAY_COLORS: Record<string, string> = {
@@ -58,7 +59,7 @@ const MyEventScreen = ({ navigation }: any) => {
   const [allEvent, setAllEvent] = useState<any>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const categories = ['All', 'Anniversary', 'Birthday', 'Engagement', 'Wedding'];
-
+  const headerAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     fetchEventsList(selectedCategory);
@@ -108,6 +109,7 @@ const MyEventScreen = ({ navigation }: any) => {
 
   const handleCategoryChange = (category: string, index: number) => {
     setSelectedCategory(category);
+    setShowHeaderTitle(true);
     
     if (scrollViewRef.current && categoryRefs.current[category]) {
       const chipLayout = categoryRefs.current[category];
@@ -121,12 +123,13 @@ const MyEventScreen = ({ navigation }: any) => {
 
   const handleScroll = (event: any) => {
     const currentScrollY = event.nativeEvent.contentOffset.y;
+    const diff = currentScrollY - lastScrollY.current;
     
     if (currentScrollY <= 0) {
       setShowHeaderTitle(true);
-    } else if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+    } else if (diff > 10 && currentScrollY > 60) {
       setShowHeaderTitle(false);
-    } else if (currentScrollY < lastScrollY.current) {
+    } else if (diff < -10) {
       setShowHeaderTitle(true);
     }
     
@@ -148,31 +151,29 @@ const MyEventScreen = ({ navigation }: any) => {
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-  Alert.alert(
-    'Delete Event',
-    'Are you sure you want to delete this event?',
-    [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await protectedApi.deleteEvent(eventId);
+    Alert.alert(
+      'Delete Event',
+      'Are you sure you want to delete this event?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await protectedApi.deleteEvent(eventId);
 
-            setAllEvent((prev: any) =>
-              prev.filter((event: any) => event._id !== eventId)
-            );
-          } catch (err) {
-            console.log('Delete error', err);
-          }
+              setAllEvent((prev: any) =>
+                prev.filter((event: any) => event._id !== eventId)
+              );
+            } catch (err) {
+              console.log('Delete error', err);
+            }
+          },
         },
-      },
-    ],
-  );
-};
-
-
+      ],
+    );
+  };
 
   const getGradientColors = (eventType: string) => EVENT_GRADIENTS[eventType] || EVENT_GRADIENTS.other;
   const getDayColor = (eventType: string) =>  EVENT_DAY_COLORS[eventType] || EVENT_DAY_COLORS.other;
@@ -264,15 +265,40 @@ const MyEventScreen = ({ navigation }: any) => {
     </TouchableOpacity>
   );
 
+
+  useEffect(() => {
+    Animated.timing(headerAnim, {
+      toValue: showHeaderTitle ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [showHeaderTitle]);
+
   const renderHeader = () => (
-    <View>
-      {showHeaderTitle && (
-        <View style={[  styles.header, { paddingTop: 15 } ]}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>{`My Events`}</Text>
-          </View>
+    <View style={{paddingTop: 16}}>
+      <Animated.View
+        style={[
+          styles.header,
+          {
+            height: headerAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 45],
+            }),
+            opacity: headerAnim,
+            overflow: 'hidden',
+          },
+        ]}
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>{`My Events`}</Text>
         </View>
-      )}
+
+        <View>
+          <TouchableOpacity style={[styles.categoryChip, {backgroundColor:'#FF0762', paddingHorizontal:10, paddingVertical:8, borderRadius:5, borderWidth:0}]}>
+            <Text style={{color: '#ffffff', fontSize: 14, fontWeight: '600'}}>+ Create Event</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
 
       <View style={styles.header}>
         <View style={{ flex: 1, paddingRight: 10 }}>
@@ -563,7 +589,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 0,
-    paddingTop: 10,
+    paddingTop: 0,
   },
 
   title: {

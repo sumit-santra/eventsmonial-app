@@ -173,10 +173,15 @@ const VendorDetailsScreen = ({ navigation, route }: any) => {
     try {
       const res = await publicApi.getVendorDetails(vendorId);
       // console.log('Vendors Response:', res);
-      setVendorsDetails(res?.data || null);
-      fetchVendorsList(res?.data?.business?.category || '');
+      if(res && res?.data){
+        setVendorsDetails(res?.data || null);
+        fetchVendorsList(res?.data?.business?.category || '');
+      }else{
+        navigation.goBack();
+      }
     } catch (err) {
       console.log(err);
+      navigation.goBack();
     } finally {
       setLoading(false);
     }

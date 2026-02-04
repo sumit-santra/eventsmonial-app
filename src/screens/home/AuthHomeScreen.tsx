@@ -107,15 +107,21 @@ const AuthHomeScreen = ({ navigation }: any) => {
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
-    const isScrollingUp = scrollY < lastScrollY - 50;
-    const isScrollingDown = scrollY > lastScrollY + 50;
-    
-    if (isScrollingUp || scrollY === 0) {
-      setShowCategories(true);
-    } else if (isScrollingDown) {
-      setShowCategories(false);
+    const diff = scrollY - lastScrollY;
+
+    if (diff < -50 || scrollY <= 0) {
+      setShowCategories(prev => {
+        if (!prev) return true;
+        return prev;
+      });
+    } 
+    else if (diff > 50) {
+      setShowCategories(prev => {
+        if (prev) return false;
+        return prev;
+      });
     }
-    
+
     setLastScrollY(scrollY);
   };
 

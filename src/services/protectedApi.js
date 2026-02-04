@@ -23,6 +23,14 @@ const protectedApi = {
     });
   },
 
+  getEventDetails: (id) => {
+    return secureFetch(`/planners/events/${id}`, {
+      method: 'GET',
+    });
+  },
+
+  
+
 
 
   getUserProfile: () => {

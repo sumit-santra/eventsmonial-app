@@ -38,7 +38,7 @@ const DEFAULT_USER_IMAGE = require('../../assets/images/default-user.png');
 
 const HomeHeader = ({navigation, showCategories = true, isCategories = true, isBackButton = false }: { navigation: any; showCategories?: boolean; isCategories?: boolean; isBackButton?: boolean }) => {
   const [active, setActive] = useState(1);
-  const animatedValues = useRef<{ [key: number]: { scale: Animated.Value; color: Animated.Value } }>({});
+  const animatedValues = useRef<{ [key: number]: { scale: Animated.Value; color: Animated.Value; height: Animated.Value } }>({});
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const { location, setLocation } = useLocation();
   const [user, setUser] = useState<User | null>(null);
@@ -49,6 +49,7 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
         animatedValues.current[item.id] = {
           scale: new Animated.Value(1),
           color: new Animated.Value(0),
+          height: new Animated.Value(showCategories ? 1 : 0),
         };
       }
       
@@ -56,17 +57,22 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
       Animated.parallel([
         Animated.timing(animatedValues.current[item.id].scale, {
           toValue: isActive ? 1.05 : 1,
-          duration: 300,
+          duration: 200,
           useNativeDriver: false,
         }),
         Animated.timing(animatedValues.current[item.id].color, {
           toValue: isActive ? 1 : 0,
-          duration: 300,
+          duration: 200,
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedValues.current[item.id].height, {
+          toValue: showCategories ? 1 : 0,
+          duration: 200,
           useNativeDriver: false,
         }),
       ]).start();
     });
-  }, [active]);
+  }, [active, showCategories]);
 
   useEffect(() => {
     checkLoginStatus();
@@ -172,17 +178,11 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
         {isCategories && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {categories.map(item => {
-              const bgColor = animatedValues.current[item.id]?.color.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['#ffffff', '#FF0762'],
-              }) || '#ffffff';
-
-              const borderColor = animatedValues.current[item.id]?.color.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['#ffffff', '#FF0762'],
-              }) || '#ffffff';
+              
 
               const scale = animatedValues.current[item.id]?.scale || new Animated.Value(1);
+
+              const height = animatedValues.current[item.id]?.height || new Animated.Value(1);
 
               return (
               <TouchableOpacity
@@ -190,20 +190,27 @@ const HomeHeader = ({navigation, showCategories = true, isCategories = true, isB
                 style={styles.category}
                 onPress={() => navigation.navigate(item.link, { categoryValue: item.label })}
               >
-                  {showCategories && (
-                      <Animated.View
-                          style={[
-                          styles.circle,
-                          {
-                            backgroundColor: bgColor,
-                            borderColor: borderColor,
-                            transform: [{ scale }],
-                          },
-                          ]}
-                      >
-                          <Image source={item.image} style={styles.categoryIcon} />
-                      </Animated.View>
-                  )}
+                <Animated.View
+                    style={[
+                    {
+                      height: height.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 64],
+                      }),
+                      opacity: height,
+                      transform: [{ scale }],
+                      overflow: 'hidden',
+                    },
+                    ]}
+                >
+                  <View style={[styles.circle, {
+                      backgroundColor: active === item.id ?  '#FF0762' :'#ffffff',
+                      borderColor: active === item.id ?  '#FF0762' :'#ffffff',
+                      marginTop: 4
+                      }]}>
+                    <Image source={item.image} style={styles.categoryIcon} />
+                  </View>
+                </Animated.View>
 
                 <Text
                   style={[
