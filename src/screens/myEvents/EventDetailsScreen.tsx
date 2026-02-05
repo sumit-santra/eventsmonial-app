@@ -44,17 +44,18 @@ const EventDetailsScreen = ({ route, navigation }: any) => {
 
   const isUpcoming = new Date(cardData.eventDate).getTime() > Date.now();
 
-  const progressSteps = [
-    { id: 1, label: 'Design the ECard', done: false },
-    { id: 2, label: 'Lock the Venue', done: true },
-    { id: 3, label: 'Create Guest List', done: true },
-    { id: 4, label: 'Pick the Vendor', done: false },
-    { id: 5, label: 'Launch Website', done: false },
-  ];
+  const [progressSteps, setProgressSteps] = useState([
+    { id: 1, label: 'Design the ECard', done: false, description: 'Create beautiful digital invitations for your guests.' },
+    { id: 2, label: 'Lock the Venue', done: false, description: 'Because every celebration needs a soul.' },
+    { id: 3, label: 'Create Guest List', done: false, description: 'Share your event details with everyone.' },
+    { id: 4, label: 'Pick the Vendor', done: false, description: 'Choose the best vendors for your event.' },
+    { id: 5, label: 'Launch Website', done: false, description: 'Make your event official with a dedicated website.' },
+  ]);
 
 
   useEffect(() => {
     fetchEventDetails();
+    fetchEventFlag();
   }, []);
 
   const onRefresh = async () => {
@@ -83,6 +84,28 @@ const EventDetailsScreen = ({ route, navigation }: any) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchEventFlag = async () => {
+    try {
+      const response = await protectedApi.getEventFlag(cardData._id);
+
+      if (response.data) {
+        console.log('Event Flag:', response.data);
+        
+        const flags = response.data;
+        setProgressSteps([
+          { id: 1, label: 'Design the ECard', done: flags.hasCard || false, description: 'Create beautiful digital invitations for your guests.' },
+          { id: 2, label: 'Lock the Venue', done: flags.hasVenueInWishlist || false, description: 'Because every celebration needs a soul.' },
+          { id: 3, label: 'Create Guest List', done: flags.hasContacts || false, description: 'Share your event details with everyone.' },
+          { id: 4, label: 'Pick the Vendor', done: flags.hasBusinessInWishlist || false, description: 'Choose the best vendors for your event.' },
+          { id: 5, label: 'Launch Website', done: flags.hasWebsite || false, description: 'Make your event official with a dedicated website.' },
+        ]);
+      }
+      
+    } catch (error) {
+      console.error('Error fetching event flag:', error);
+    } 
   };
 
   const getCountdown = () => {
@@ -141,11 +164,11 @@ const EventDetailsScreen = ({ route, navigation }: any) => {
     },
     {
       title: 'Find and save vendors for your event.',
-      content: 'Share your event details with everyone.',
+      content: 'Choose the best vendors for your event.',
     },
     {
       title: 'Create a website with all your event details.',
-      content: 'Share your event details with everyone.',
+      content: 'Make your event official with a dedicated website.',
     },
   ];
 
@@ -162,7 +185,7 @@ const EventDetailsScreen = ({ route, navigation }: any) => {
         />
       }
     >
-      {/* HERO IMAGE */}
+      
       <ImageBackground
         source={EVENT_IMAGES[eventType]}
         style={styles.hero}
@@ -199,7 +222,7 @@ const EventDetailsScreen = ({ route, navigation }: any) => {
         </View>
       </ImageBackground>
 
-      {/* CONTENT */}
+      
       <View style={styles.content}>
         <View style={{flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginBottom: 20}}>
           <View style={styles.infoRow}>
@@ -240,13 +263,11 @@ const EventDetailsScreen = ({ route, navigation }: any) => {
             <MaterialIcons name="family-restroom" size={22} color="#FF0762" />
             <Text style={styles.infoText}>{data.eventParticipants?.serviceSide || 'N/A'}</Text>
           </View>
-
-          
         </View>
 
         <View>
           <Text style={styles.sectionTitle}>
-            Birthday Preparation Progress
+            {cardData.eventType} preparation progress
           </Text>
 
           <ScrollView
@@ -280,7 +301,7 @@ const EventDetailsScreen = ({ route, navigation }: any) => {
         </View>
 
         <View>
-            <EventOverviewSlider />
+            <EventOverviewSlider data={data} progressSteps={progressSteps} />
         </View>
 
         <View>
@@ -322,6 +343,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 10,
     marginBottom: 6,
+    textTransform: 'capitalize',
   },
 
   progressPill: {

@@ -28,6 +28,7 @@ import PasswordOTPScreen from '../screens/auth/PasswordOTPScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyEventScreen from '../screens/myEvents/MyEventScreen';
 import EventDetailsScreen from '../screens/myEvents/EventDetailsScreen';
+import CreateEventScreen from '../screens/myEvents/CreateEventScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -48,6 +49,7 @@ export type RootStackParamList = {
 
   MyEvent: undefined;
   EventDetails: undefined;
+  CreateEvent: undefined;
 
   VendorList: { categoryValue: string };
   VendorDetail: undefined;
@@ -116,6 +118,7 @@ const AppNavigator = () => {
 
         <Stack.Screen name="MyEvent" component={MyEventScreen} />
         <Stack.Screen name="EventDetails" component={EventDetailsScreen} />
+        <Stack.Screen name="CreateEvent" component={CreateEventScreen} />
 
         <Stack.Screen name="Terms" component={TermsScreen} />
         <Stack.Screen name="Privacy" component={PrivacyScreen} />

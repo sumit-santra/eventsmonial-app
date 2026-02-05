@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,63 @@ import {
   Image,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Toast from 'react-native-toast-message';
+import AddCeremonyModal from './AddCeremonyModal';
+import protectedApi from '../../services/protectedApi';
 
-const EventOverviewSlider = () => {
+const EventOverviewSlider = ({ data, progressSteps }: any) => {
+  const [showCeremonyModal, setShowCeremonyModal] = useState(false);
+  const [ceremonies, setCeremonies] = useState<Array<any>>([]);
+
+
+  useEffect(() => {
+    fetchCeremonies();
+  }, [data?._id]);
+
+  const fetchCeremonies = async () => {
+    try {
+      const response = await protectedApi.getEventCeremonies(data?._id || '');
+      if (response && response.data && Array.isArray(response.data)) {
+        setCeremonies(response.data);
+      }
+      // setCeremonies(response);
+    } catch (error) {
+      console.error('Error fetching ceremonies:', error);
+    }
+  };
+
+
+  const handleAddCeremony = async (ceremony: { title: string; date: Date; time: Date }) => {
+    const postData = {
+      eventId: data?._id || '',
+      workTime: ceremony.time.toTimeString().slice(0, 5),
+      workTitle: ceremony.title,
+      workingDate: ceremony.date.toISOString().split('T')[0]
+    };
+
+    try {
+      const response = await protectedApi.addCeremony(postData);
+      if(response && response.success && response.data) {
+        fetchCeremonies();
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Ceremony added successfully'
+        });
+      }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to add ceremony'
+      });
+    } finally {
+      setShowCeremonyModal(false);
+    }
+     
+    // Send postData to your API
+  };
+
   return (
     <ScrollView
       horizontal
@@ -22,52 +77,74 @@ const EventOverviewSlider = () => {
           <Text style={styles.title}>Important work</Text>
         </View>
 
-        {[
-          {
-            step: 1,
-            title: 'Design the ECard',
-            desc: 'Create beautiful digital invitations for your guests.',
-          },
-          {
-            step: 2,
-            title: 'Pick the Vendor',
-            desc: 'Because every celebration needs a soul.',
-          },
-          {
-            step: 3,
-            title: 'Launch Website',
-            desc: 'Share your event details with everyone.',
-          },
-        ].map(item => (
-          <View key={item.step} style={styles.row}>
-            <View style={styles.stepCircle}>
-              <Text style={styles.stepText}>{item.step}</Text>
+        <ScrollView 
+          style={{maxHeight: 200}}
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={true}
+        >
+          {progressSteps.filter((item: any) => !item.done).length > 0 ? (
+            progressSteps.filter((item: any) => !item.done).map((item: any) => (
+              <View key={item.id} style={styles.row}>
+                <View style={styles.stepCircle}>
+                  <Text style={styles.stepText}>{item.id}</Text>
+                </View>
+                <View style={{flexShrink: 1}}>
+                  <Text style={styles.rowTitle}>{item.label}</Text>
+                  <Text style={styles.rowDesc}>{item.description}</Text>
+                </View>
+              </View>
+            ))
+          ) : (
+            <View style={styles.empty}>
+              <MaterialIcons name="check-circle" size={30} color="#4CAF50" style={{marginBottom: 10}} />
+              <Text style={styles.emptyTitle}>Complete all work</Text>
             </View>
-
-            <View style={{ flex: 1 }}>
-              <Text style={styles.rowTitle}>{item.title}</Text>
-              <Text style={styles.rowDesc}>{item.desc}</Text>
-            </View>
-          </View>
-        ))}
+          )}
+        </ScrollView>
       </View>
 
       {/* Ceremonies */}
       <View style={[styles.card, {backgroundColor: '#E8F5E9'}]}>
         <View style={styles.header}>
           <Text style={styles.title}>Ceremonies</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setShowCeremonyModal(true)}>
             <Text style={styles.action}>+ Add a ceremony</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.empty}>
-          <MaterialIcons name="event" size={30} color="#9CA3AF" style={{marginBottom: 10}} />
-          <Text style={styles.emptyTitle}>No ceremonies yet</Text>
-          <Text style={styles.emptyDesc}>
-            Click "Add a ceremony" to get started
-          </Text>
-        </View>
+        <ScrollView 
+          style={{maxHeight: 200}}
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={true}
+        >
+          {ceremonies.length > 0 ? (
+            ceremonies.map((ceremony: any, index: number) => (
+              <View key={index} style={styles.row}>
+                <View style={styles.stepCircle}>
+                  <MaterialIcons name="event" size={16} color="#fff" />
+                </View>
+                <View style={{flexShrink: 1}}>  
+                  <Text style={styles.rowTitle}>{ceremony.workTitle}</Text>
+                  <Text style={styles.rowDesc}>
+                    {ceremony.workingDate} at {ceremony.workTime}
+                  </Text>
+                </View>
+              </View>
+            ))
+          ) : (
+
+          <View style={styles.empty}>
+            <MaterialIcons name="event" size={30} color="rgb(71, 145, 234)" style={{marginBottom: 10}} />
+            <Text style={styles.emptyTitle}>No ceremonies yet</Text>
+            <Text style={styles.emptyDesc}>
+              Click "Add a ceremony" to get started
+            </Text>
+          </View>
+          )}
+
+        </ScrollView>
+
+        
       </View>
 
       {/* Notes */}
@@ -87,6 +164,12 @@ const EventOverviewSlider = () => {
           </Text>
         </View>
       </View>
+
+      <AddCeremonyModal
+        visible={showCeremonyModal}
+        onClose={() => setShowCeremonyModal(false)}
+        onSubmit={handleAddCeremony}
+      />
     </ScrollView>
   );
 };
@@ -142,6 +225,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
+    flexShrink: 0,
   },
 
   stepText: {

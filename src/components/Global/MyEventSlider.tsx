@@ -212,7 +212,7 @@ const MyEventSlider = ({ navigation, events = [], loading = false, title, button
           </Text>
 
           <View style={{paddingHorizontal: 20, paddingTop: 10, alignItems: 'center'}}>
-            <TouchableOpacity style={{backgroundColor:'#FF0055', paddingHorizontal:20, paddingVertical:10, borderRadius:8, marginTop:10}}>
+            <TouchableOpacity onPress={() => navigation.navigate('CreateEvent')} style={{backgroundColor:'#FF0055', paddingHorizontal:20, paddingVertical:10, borderRadius:8, marginTop:10}}>
               <Text style={{fontSize: 14, fontWeight:'600', color:'white', textAlign: 'center'}}>Start your event journey</Text>
             </TouchableOpacity>
           </View>

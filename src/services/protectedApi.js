@@ -29,7 +29,41 @@ const protectedApi = {
     });
   },
 
-  
+  getEventFlag: (id) => {
+    return secureFetch(`/planners/events/flags/${id}`, {
+      method: 'GET',
+    });
+  },
+
+  getEventCeremonies: (id) => {
+    return secureFetch(`/planners/work-list/${id}`, {
+      method: 'GET',
+    });
+  },
+
+  createEvent: (eventData) => {
+    return secureFetch('/planners/events/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
+    });
+  },
+
+  addCeremony: (ceremonyData) => {
+    return secureFetch('/planners/work-list/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(ceremonyData),
+    });
+  },
+
+
+
+
 
 
 

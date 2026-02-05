@@ -15,6 +15,7 @@ import HomeVideoCard from '../../components/Global/HomeVideoCard';
 import StartAssistantCard from '../../components/Global/StartAssistantCard';
 import protectedApi from '../../services/protectedApi';
 import MyEventSlider from '../../components/Global/MyEventSlider';
+import { useFocusEffect } from '@react-navigation/native';
 
 const AuthHomeScreen = ({ navigation }: any) => {
   const [showCategories, setShowCategories] = useState(true);
@@ -37,6 +38,12 @@ const AuthHomeScreen = ({ navigation }: any) => {
     fetchVendorCategoriesList('bridalmakeup');
     fetchCardsList();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadUpcomingEvents();
+    }, [])
+  );
 
   const loadUpcomingEvents = async () => {
     setLoadingEvent(true);

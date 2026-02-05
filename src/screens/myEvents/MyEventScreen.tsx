@@ -12,6 +12,7 @@ import {
   Alert,
   Animated,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import HomeHeader from '../../components/Layout/HomeHeader';
 import NoDataComponent from '../../components/Global/NoDataComponent';
@@ -30,18 +31,18 @@ const EVENT_IMAGES: Record<string, any> = {
 };
 
 const EVENT_GRADIENTS: Record<string, string[]> = {
-  wedding: ['rgba(255,241,252,0.0)', '#faeedc'],
-  anniversary: ['rgba(229,236,253,0.0)', '#f9d8e8'],
-  engagement: ['rgba(254,243,229,0.0)', '#f6d2fa'],
-  birthday: ['rgba(206,255,230,0.0)', '#cfdcfb'],
-  puja: ['rgba(252,239,211,0.0)', '#f6e7c5'],
-  other: ['rgba(0,0,0,0.0)', '#dbd9d1'],
+  wedding: ['rgba(255,241,252,0.0)', '#fee3e3'],
+  anniversary: ['rgba(229,236,253,0.0)', '#f9d8ea'],
+  engagement: ['rgba(254,243,229,0.0)', '#dbf6ba'],
+  birthday: ['rgba(206,255,230,0.0)', '#e2ebfd'],
+  puja: ['rgba(252,239,211,0.0)', '#f1e4c1'],
+  other: ['rgba(0,0,0,0.0)', '#eaebf1'],
 };
 
 const EVENT_DAY_COLORS: Record<string, string> = {
   wedding: '#fd910d',
   anniversary: '#ff0285',
-  engagement: '#EA02FB',
+  engagement: '#7bb92f',
   birthday: '#0648e2',
   puja: '#FFBB00',
   other: '#454107',
@@ -64,6 +65,12 @@ const MyEventScreen = ({ navigation }: any) => {
   useEffect(() => {
     fetchEventsList(selectedCategory);
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchEventsList(selectedCategory);
+    }, [selectedCategory])
+  );
 
   const fetchEventsList = async (categories: string) => {
   
@@ -294,7 +301,7 @@ const MyEventScreen = ({ navigation }: any) => {
         </View>
 
         <View>
-          <TouchableOpacity style={[styles.categoryChip, {backgroundColor:'#FF0762', paddingHorizontal:10, paddingVertical:8, borderRadius:5, borderWidth:0}]}>
+          <TouchableOpacity onPress={() => navigation.navigate('CreateEvent')} style={[styles.categoryChip, {backgroundColor:'#FF0762', paddingHorizontal:10, paddingVertical:8, borderRadius:5, borderWidth:0}]}>
             <Text style={{color: '#ffffff', fontSize: 14, fontWeight: '600'}}>+ Create Event</Text>
           </TouchableOpacity>
         </View>
