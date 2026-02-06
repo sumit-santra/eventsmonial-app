@@ -61,17 +61,54 @@ const protectedApi = {
     });
   },
 
-
-
-
-
-
-
-  getUserProfile: () => {
-    return secureFetch('/user/profile', {
+  getAllGuests: () => {
+    return secureFetch('/planners/get-all-contacts', {
       method: 'GET',
     });
   },
+
+  deleteMultipleContacts: (data) => {
+    return secureFetch('/planners/delete-multiple-contacts', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+  },
+
+  createContact: (data) => {
+    return secureFetch('/planners/create-contacts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateContact: (id, data) => {
+    return secureFetch(`/planners/update-contact/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+  },
+
+  uploadCSV: (formData) => {
+    return secureFetch('/planners/upload-csv', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+
+
+
+
+
 
 };
 

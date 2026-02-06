@@ -4,6 +4,11 @@
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location to show nearby services</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to upload photos</string>
+
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access to upload photos</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
